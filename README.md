@@ -33,22 +33,25 @@ notes / resources   ────────── theory & references
 
 ## Agent constraints
 
-| Doc                       | English                                  | 中文                                   |
-| ------------------------- | ---------------------------------------- | -------------------------------------- |
-| Lab working agreements    | [AGENTS.md](AGENTS.md)                   | [AGENTS_zh.md](AGENTS_zh.md)           |
-| What AGENTS.md constrains | [notes/method/agents-md.md](notes/method/agents-md.md) | [notes/method/agents-md_zh.md](notes/method/agents-md_zh.md) |
+| Doc                       | Link                                     |
+| ------------------------- | ---------------------------------------- |
+| Lab working agreements    | [AGENTS.md](AGENTS.md) · [中文](AGENTS_zh.md) |
+| What AGENTS.md constrains | [notes/method/agents-md.md](notes/method/agents-md.md) · [中文](notes/method/agents-md_zh.md) |
 
 ## Start here
 
 ### Notes
 
-| Topic                              | English                                                        | 中文                                                           |
-| ---------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------- |
-| Learn a codebase (prompt → result) | [notes/method/learn-codebase-flow.md](notes/method/learn-codebase-flow.md)   | [notes/method/learn-codebase-flow_zh.md](notes/method/learn-codebase-flow_zh.md) |
-| Codex architecture                 | [notes/codex/architecture.md](notes/codex/architecture.md)                | [notes/codex/architecture_zh.md](notes/codex/architecture_zh.md)            |
-| Layered design                     | [notes/codex/layered-design.md](notes/codex/layered-design.md)               | [notes/codex/layered-design_zh.md](notes/codex/layered-design_zh.md)         |
-| What AGENTS.md constrains          | [notes/method/agents-md.md](notes/method/agents-md.md)                       | [notes/method/agents-md_zh.md](notes/method/agents-md_zh.md)                 |
-| Field research (3 voice interviews)| [notes/research/real-workflows.md](notes/research/real-workflows.md)             | [notes/research/real-workflows_zh.md](notes/research/real-workflows_zh.md)       |
+Full index with reading order: [notes/README.md](notes/README.md)
+
+| Topic                              | Note                                                           |
+| ---------------------------------- | -------------------------------------------------------------- |
+| Learn a codebase (prompt → result) | [method/learn-codebase-flow.md](notes/method/learn-codebase-flow.md) · [中文](notes/method/learn-codebase-flow_zh.md) |
+| Codex architecture                 | [codex/architecture.md](notes/codex/architecture.md) · [中文](notes/codex/architecture_zh.md) |
+| Layered design                     | [codex/layered-design.md](notes/codex/layered-design.md) · [中文](notes/codex/layered-design_zh.md) |
+| TUI interface design               | [codex/tui-interface-design.md](notes/codex/tui-interface-design.md) · [中文](notes/codex/tui-interface-design_zh.md) |
+| What AGENTS.md constrains          | [method/agents-md.md](notes/method/agents-md.md) · [中文](notes/method/agents-md_zh.md) |
+| Field research (3 voice interviews)| [research/real-workflows.md](notes/research/real-workflows.md) · [中文](notes/research/real-workflows_zh.md) |
 
 ### Cases
 

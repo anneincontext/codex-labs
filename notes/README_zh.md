@@ -21,25 +21,13 @@ notes/
 
 | 你想… | 读这个 |
 | ----- | ------ |
-| 快速建立 openai/codex 全貌 | [codex/architecture_zh.md](codex/architecture_zh.md) *(hub——其他 codex/ 笔记都从它分出)* |
-| 理解 crate 分层 | [codex/layered-design_zh.md](codex/layered-design_zh.md) |
-| 看终端 UI 怎么设计的 | [codex/tui-interface-design_zh.md](codex/tui-interface-design_zh.md) |
-| 查 TUI slash 命令 / 快捷键 | [codex/tui-commands_zh.md](codex/tui-commands_zh.md) |
-| 学「用 agent 读懂一个仓库」（本 lab 的工作流） | [method/learn-codebase-flow_zh.md](method/learn-codebase-flow_zh.md) |
-| 写好一份 AGENTS.md | [method/agents-md_zh.md](method/agents-md_zh.md) |
-| 了解从业者实际怎么用 AI 工具 | [research/real-workflows_zh.md](research/real-workflows_zh.md) |
-
-## 全部笔记
-
-| 笔记 | English | 中文 |
-| ---- | ------- | ---- |
-| 架构总览 | [codex/architecture.md](codex/architecture.md) | [codex/architecture_zh.md](codex/architecture_zh.md) |
-| 分层设计 | [codex/layered-design.md](codex/layered-design.md) | [codex/layered-design_zh.md](codex/layered-design_zh.md) |
-| TUI 接口设计 | [codex/tui-interface-design.md](codex/tui-interface-design.md) | [codex/tui-interface-design_zh.md](codex/tui-interface-design_zh.md) |
-| TUI 指令 | [codex/tui-commands.md](codex/tui-commands.md) | [codex/tui-commands_zh.md](codex/tui-commands_zh.md) |
-| 学习代码库（prompt → 结果） | [method/learn-codebase-flow.md](method/learn-codebase-flow.md) | [method/learn-codebase-flow_zh.md](method/learn-codebase-flow_zh.md) |
-| AGENTS.md 约束什么 | [method/agents-md.md](method/agents-md.md) | [method/agents-md_zh.md](method/agents-md_zh.md) |
-| 真实世界工作流（三次访谈） | [research/real-workflows.md](research/real-workflows.md) | [research/real-workflows_zh.md](research/real-workflows_zh.md) |
+| 快速建立 openai/codex 全貌 | [codex/architecture_zh.md](codex/architecture_zh.md) · [EN](codex/architecture.md) *(hub——其他 codex/ 笔记都从它分出)* |
+| 理解 crate 分层 | [codex/layered-design_zh.md](codex/layered-design_zh.md) · [EN](codex/layered-design.md) |
+| 看终端 UI 怎么设计的 | [codex/tui-interface-design_zh.md](codex/tui-interface-design_zh.md) · [EN](codex/tui-interface-design.md) |
+| 查 TUI slash 命令 / 快捷键 | [codex/tui-commands_zh.md](codex/tui-commands_zh.md) · [EN](codex/tui-commands.md) |
+| 学「用 agent 读懂一个仓库」（本 lab 的工作流） | [method/learn-codebase-flow_zh.md](method/learn-codebase-flow_zh.md) · [EN](method/learn-codebase-flow.md) |
+| 写好一份 AGENTS.md | [method/agents-md_zh.md](method/agents-md_zh.md) · [EN](method/agents-md.md) |
+| 了解从业者实际怎么用 AI 工具 | [research/real-workflows_zh.md](research/real-workflows_zh.md) · [EN](research/real-workflows.md) |
 
 ## 约定
 
