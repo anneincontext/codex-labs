@@ -4,7 +4,7 @@
 
 **类型：** 语音访谈 / 田野笔记  
 **来源：** 与受访者语音聊天  
-**提炼：** [notes/real-workflows_cn.md](../../notes/real-workflows_cn.md)  
+**提炼：** [notes/research/real-workflows_zh.md](../../notes/research/real-workflows_zh.md)  
 **相关案例：** [002-biotech-swe](../002-biotech-swe/case_zh.md) · [003-fintech-doc-pipeline](../003-fintech-doc-pipeline/case_zh.md)
 
 ---

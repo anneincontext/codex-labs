@@ -41,7 +41,7 @@ Rules for Codex (and humans) maintaining this repository.
 - Embed inline in markdown: a fenced ` ```mermaid ` code block (GitHub renders it natively).
 - Bilingual notes: separate ` ```mermaid ` blocks per language when labels differ (EN doc vs CN doc).
 - Keep diagrams focused — one flow per block; prefer `flowchart TD` for step-by-step paths.
-- Example: [notes/learn-codebase-flow.md](notes/learn-codebase-flow.md).
+- Example: [notes/method/learn-codebase-flow.md](notes/method/learn-codebase-flow.md).
 
 ### Before committing
 

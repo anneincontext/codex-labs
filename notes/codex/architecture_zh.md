@@ -2,10 +2,14 @@
 
 [English](architecture.md) | **中文**
 
+> **回答什么：** openai/codex 做什么、如何组织、请求如何流转。
+> **读者前置：** 无——这是所有 codex/ 笔记的入口（hub）。
+> **校验基准：** [openai/codex](https://github.com/openai/codex)@`da4c8ca`（2026-07-03）——引用细节前先 `git diff da4c8ca..HEAD -- codex-rs/` 确认是否漂移。
+
 [openai/codex](https://github.com/openai/codex) 仓库的高层概览——项目做什么、如何组织、请求如何流转、用了哪些技术。
 
-> 这份笔记怎么来的：[案例 005](../cases/005-learn-codex-repo/case_zh.md) · 链路：[learn-codebase-flow_cn.md](learn-codebase-flow_cn.md) · prompt：[learn-repo-overview_zh.md](../prompts/learn-repo-overview_zh.md)  
-> 逐层详解见 [layeredDesign_cn.md](layeredDesign_cn.md)（中文）或 [layeredDesign.md](layeredDesign.md)（English）。
+> 这份笔记怎么来的：[案例 005](../../cases/005-learn-codex-repo/case_zh.md) · 链路：[learn-codebase-flow_zh.md](../method/learn-codebase-flow_zh.md) · prompt：[learn-repo-overview_zh.md](../../prompts/learn-repo-overview_zh.md)  
+> 逐层详解见 [layered-design_zh.md](layered-design_zh.md)（中文）或 [layered-design.md](layered-design.md)（English）。
 
 ---
 
@@ -96,7 +100,7 @@ pub struct Codex {
 **前端 / 入口**
 
 - [`cli`](https://github.com/openai/codex/tree/main/codex-rs/cli) — `codex` 多合一二进制；解析子命令并分发
-- [`tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) — 交互式 Ratatui 终端 UI（无子命令时的默认）；接口设计见 [tui-interface-design_cn.md](tui-interface-design_cn.md)
+- [`tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) — 交互式 Ratatui 终端 UI（无子命令时的默认）；接口设计见 [tui-interface-design_zh.md](tui-interface-design_zh.md)
 - [`exec`](https://github.com/openai/codex/tree/main/codex-rs/exec) — 无头 `codex exec` 模式（CI/脚本）
 - [`mcp-server`](https://github.com/openai/codex/tree/main/codex-rs/mcp-server) — 把 Codex 自身作为 MCP server 通过 stdio 暴露
 - [`app-server`](https://github.com/openai/codex/tree/main/codex-rs/app-server) / [`app-server-protocol`](https://github.com/openai/codex/tree/main/codex-rs/app-server-protocol) — 支撑 IDE/桌面/SDK 的 JSON-RPC 服务 + v1/v2 API 类型
@@ -251,8 +255,8 @@ Codex 在两个方向上都讲 **Model Context Protocol**。
 
 ### 本仓库（codex-labs）
 
-- [layeredDesign_cn.md](layeredDesign_cn.md) / [layeredDesign.md](layeredDesign.md) — 分层架构详解
-- [resources/links_zh.md](../resources/links_zh.md) / [links.md](../resources/links.md) — 精选外部链接
+- [layered-design_zh.md](layered-design_zh.md) / [layered-design.md](layered-design.md) — 分层架构详解
+- [resources/links_zh.md](../../resources/links_zh.md) / [links.md](../../resources/links.md) — 精选外部链接
 
 ### GitHub 上的 [openai/codex](https://github.com/openai/codex)
 

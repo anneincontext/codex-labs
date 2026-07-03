@@ -1,8 +1,11 @@
 # Real-world AI workflows (field research)
 
-**English** | [中文](real-workflows_cn.md)
+**English** | [中文](real-workflows_zh.md)
 
-Synthesis from three voice interviews with practitioners. Full writeups: [002-biotech-swe](../cases/002-biotech-swe/case.md) · [003-fintech-doc-pipeline](../cases/003-fintech-doc-pipeline/case.md) · [004-bigtech-infra](../cases/004-bigtech-infra/case.md).
+> **Answers:** how practitioners actually use AI coding tools (3 interviews, synthesized).
+> **Read first:** nothing; per-person detail lives in [cases/](../../cases/).
+
+Synthesis from three voice interviews with practitioners. Full writeups: [002-biotech-swe](../../cases/002-biotech-swe/case.md) · [003-fintech-doc-pipeline](../../cases/003-fintech-doc-pipeline/case.md) · [004-bigtech-infra](../../cases/004-bigtech-infra/case.md).
 
 ## Cross-cutting patterns
 
@@ -37,9 +40,9 @@ Interviewee moved from a **small company to a big one** — **just joined, not o
 
 Harness views mostly come from small-company years; still domain-tied (test platform, observability, middleware state, etc.).
 
-He also said Codex works well for **codebase interpretation** — Anne later used the same approach on openai/codex, which is [why codex-labs exists](../cases/005-learn-codex-repo/case.md); AI is genuinely effective at helping people understand a repo.
+He also said Codex works well for **codebase interpretation** — Anne later used the same approach on openai/codex, which is [why codex-labs exists](../../cases/005-learn-codex-repo/case.md); AI is genuinely effective at helping people understand a repo.
 
-**Lab mapping:** [agents-md.md](agents-md.md) is project-local; org harness = per-domain skills + evals. Full case: [004-bigtech-infra](../cases/004-bigtech-infra/case.md).
+**Lab mapping:** [agents-md.md](../method/agents-md.md) is project-local; org harness = per-domain skills + evals. Full case: [004-bigtech-infra](../../cases/004-bigtech-infra/case.md).
 
 ### 5. Productivity ≠ less work
 
@@ -75,4 +78,4 @@ Hand-written code (still common day to day)
 
 ## Cases
 
-- [002-biotech-swe](../cases/002-biotech-swe/case.md) · [003-fintech-doc-pipeline](../cases/003-fintech-doc-pipeline/case.md) · [004-bigtech-infra](../cases/004-bigtech-infra/case.md)
+- [002-biotech-swe](../../cases/002-biotech-swe/case.md) · [003-fintech-doc-pipeline](../../cases/003-fintech-doc-pipeline/case.md) · [004-bigtech-infra](../../cases/004-bigtech-infra/case.md)

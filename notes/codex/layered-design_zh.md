@@ -1,8 +1,12 @@
 # Codex 分层架构详解
 
-[English](layeredDesign.md) | **中文**
+[English](layered-design.md) | **中文**
 
-逐层讲解 Codex 仓库的架构。crate 级地图和请求流转见 [architecture_cn.md](architecture_cn.md)。
+> **回答什么：** crate 如何分层、每层负责什么。
+> **读者前置：** [architecture_zh.md](architecture_zh.md)。
+> **校验基准：** [openai/codex](https://github.com/openai/codex)@`da4c8ca`（2026-07-03）——引用细节前先 `git diff da4c8ca..HEAD -- codex-rs/` 确认是否漂移。
+
+逐层讲解 Codex 仓库的架构。crate 级地图和请求流转见 [architecture_zh.md](architecture_zh.md)。
 
 ---
 
@@ -240,8 +244,8 @@ initialize → thread/start → turn/start → 收 item/* 通知 → turn/comple
 
 ### 本仓库（codex-labs）
 
-- [architecture_cn.md](architecture_cn.md) / [architecture.md](architecture.md) — 仓库架构总览
-- [resources/links_zh.md](../resources/links_zh.md) / [links.md](../resources/links.md) — 精选外部链接
+- [architecture_zh.md](architecture_zh.md) / [architecture.md](architecture.md) — 仓库架构总览
+- [resources/links_zh.md](../../resources/links_zh.md) / [links.md](../../resources/links.md) — 精选外部链接
 
 ### GitHub 上的 [openai/codex](https://github.com/openai/codex)
 

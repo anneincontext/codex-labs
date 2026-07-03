@@ -8,10 +8,10 @@
 
 ## Prompts / Notes produced
 
-- **Flow (prompt → result):** [notes/learn-codebase-flow.md](../../notes/learn-codebase-flow.md) / [中文](../../notes/learn-codebase-flow_cn.md)
+- **Flow (prompt → result):** [notes/method/learn-codebase-flow.md](../../notes/method/learn-codebase-flow.md) / [中文](../../notes/method/learn-codebase-flow_zh.md)
 - **First prompt:** [prompts/learn-repo-overview.md](../../prompts/learn-repo-overview.md)
-- **Architecture overview:** [notes/architecture.md](../../notes/architecture.md) / [中文](../../notes/architecture_cn.md)
-- **Layer-by-layer walkthrough:** [notes/layeredDesign.md](../../notes/layeredDesign.md) / [中文](../../notes/layeredDesign_cn.md)
+- **Architecture overview:** [notes/codex/architecture.md](../../notes/codex/architecture.md) / [中文](../../notes/codex/architecture_zh.md)
+- **Layer-by-layer walkthrough:** [notes/codex/layered-design.md](../../notes/codex/layered-design.md) / [中文](../../notes/codex/layered-design_zh.md)
 
 ## Context
 
@@ -43,7 +43,7 @@ One prompt, five sections. No need to know entry points upfront — the question
 - Explained request flow: user input → session → model → tools → sandbox → events back to UI
 - Listed technologies: Rust workspace, Bazel/Cargo, TypeScript SDK packaging, MCP, etc.
 
-Follow-up conversation turned that into persistent notes in this lab (`architecture`, `layeredDesign`) — bilingual, with ASCII diagrams and links into the real repo.
+Follow-up conversation turned that into persistent notes in this lab (`architecture`, `layered-design`) — bilingual, with ASCII diagrams and links into the real repo.
 
 ## What Worked
 

@@ -8,10 +8,10 @@
 
 ## Prompt / 产出的 Notes
 
-- **链路（prompt → 结果）：** [notes/learn-codebase-flow_cn.md](../../notes/learn-codebase-flow_cn.md) / [English](../../notes/learn-codebase-flow.md)
+- **链路（prompt → 结果）：** [notes/method/learn-codebase-flow_zh.md](../../notes/method/learn-codebase-flow_zh.md) / [English](../../notes/method/learn-codebase-flow.md)
 - **第一个 prompt：** [prompts/learn-repo-overview_zh.md](../../prompts/learn-repo-overview_zh.md)
-- **架构总览：** [notes/architecture_cn.md](../../notes/architecture_cn.md) / [English](../../notes/architecture.md)
-- **分层细读：** [notes/layeredDesign_cn.md](../../notes/layeredDesign_cn.md) / [English](../../notes/layeredDesign.md)
+- **架构总览：** [notes/codex/architecture_zh.md](../../notes/codex/architecture_zh.md) / [English](../../notes/codex/architecture.md)
+- **分层细读：** [notes/codex/layered-design_zh.md](../../notes/codex/layered-design_zh.md) / [English](../../notes/codex/layered-design.md)
 
 ## 背景
 
@@ -43,7 +43,7 @@ Please explain:
 - 说明请求流：用户输入 → session → 模型 → 工具 → 沙箱 → 事件回 UI
 - 列出技术栈：Rust workspace、Bazel/Cargo、TypeScript 打包、MCP 等
 
-后续对话把这些沉淀成本 lab 里的 `notes/`（`architecture`、`layeredDesign`）— 双语、带 ASCII 图、链到真实仓库路径。
+后续对话把这些沉淀成本 lab 里的 `notes/`（`architecture`、`layered-design`）— 双语、带 ASCII 图、链到真实仓库路径。
 
 ## 哪些有效
 

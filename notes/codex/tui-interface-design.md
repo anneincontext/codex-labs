@@ -1,8 +1,12 @@
 # TUI interface design — `codex-tui`
 
-**English** | [中文](tui-interface-design_cn.md)
+**English** | [中文](tui-interface-design_zh.md)
 
-How the [`codex-tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) crate is structured: layers, event buses, rendering traits, and input routing. Read against the repo map in [architecture.md](architecture.md) and crate layering in [layeredDesign.md](layeredDesign.md).
+> **Answers:** how the TUI crate is designed — event buses, app-server bridge, rendering.
+> **Read first:** [architecture.md](architecture.md).
+> **Verified against:** [openai/codex](https://github.com/openai/codex)@`da4c8ca` (2026-07-03) — re-check `git diff da4c8ca..HEAD -- codex-rs/` before trusting details.
+
+How the [`codex-tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) crate is structured: layers, event buses, rendering traits, and input routing. Read against the repo map in [architecture.md](architecture.md) and crate layering in [layered-design.md](layered-design.md).
 
 > Source tree: [`codex-rs/tui/src/`](https://github.com/openai/codex/tree/main/codex-rs/tui/src)
 
@@ -337,6 +341,6 @@ Runtime chat goes through **app-server JSON-RPC**. Slash commands and shortcuts 
 | --- | ---- |
 | TUI commands (slash / shortcuts) | [tui-commands.md](tui-commands.md) |
 | Architecture map | [architecture.md](architecture.md) |
-| Crate layering | [layeredDesign.md](layeredDesign.md) |
+| Crate layering | [layered-design.md](layered-design.md) |
 | App-server RPC (repo detail) | [app-server README](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md) |
 | TUI styling | [`codex-rs/tui/styles.md`](https://github.com/openai/codex/blob/main/codex-rs/tui/styles.md) |

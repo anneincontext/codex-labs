@@ -1,6 +1,9 @@
 # What does AGENTS.md constrain?
 
-**English** | [中文](agents-md_cn.md)
+**English** | [中文](agents-md_zh.md)
+
+> **Answers:** what an AGENTS.md file constrains, layer by layer, with a real example.
+> **Read first:** nothing — transferable method, not tied to a codebase version.
 
 `AGENTS.md` is a **project-local contract** injected into the agent's context. It does not run code — it **shapes decisions** before and during work.
 
@@ -64,7 +67,7 @@ Compare with [openai/codex AGENTS.md](https://github.com/openai/codex/blob/main/
 
 | AGENTS.md layer | Where it lives here |
 | --------------- | ------------------- |
-| Repo-wide rules | [`AGENTS.md`](../AGENTS.md) |
+| Repo-wide rules | [`AGENTS.md`](../../AGENTS.md) |
 | Skill procedure | `skills/<name>/SKILL.md` |
 | Human gates | `skills/<name>/checklist.md` |
 | Multi-skill flow | `workflows/<name>/WORKFLOW.md` |
@@ -74,11 +77,11 @@ Your presenter demo shows that **a small AGENTS.md beats a long system prompt** 
 
 ## prompt.md vs AGENTS.md (Realtime case)
 
-Anne used [`Realtime api prompt`](../prompts/implement-demo.md) to **bootstrap** the demo and [AGENTS.md](https://github.com/anneincontext/realtime-ai-presenter/blob/main/AGENTS.md) to **maintain** it:
+Anne used [`Realtime api prompt`](../../prompts/implement-demo.md) to **bootstrap** the demo and [AGENTS.md](https://github.com/anneincontext/realtime-ai-presenter/blob/main/AGENTS.md) to **maintain** it:
 
 | File | When | Constrains |
 | ---- | ---- | ---------- |
 | `prompt.md` | First session (or big feature) | Product goal, base repo, success criteria, verification, scope caps |
 | `AGENTS.md` | Every later edit | Test habits, toolchain, dep approval, taste, anti-patterns |
 
-Case writeup: [cases/001-realtime-ai-presenter/case.md](../cases/001-realtime-ai-presenter/case.md).
+Case writeup: [cases/001-realtime-ai-presenter/case.md](../../cases/001-realtime-ai-presenter/case.md).

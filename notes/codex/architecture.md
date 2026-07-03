@@ -1,11 +1,15 @@
 # Codex Repository Architecture
 
-**English** | [中文](architecture_cn.md)
+**English** | [中文](architecture_zh.md)
+
+> **Answers:** what openai/codex does, how it is structured, how a request flows.
+> **Read first:** nothing — this is the entry point (hub) for all codex/ notes.
+> **Verified against:** [openai/codex](https://github.com/openai/codex)@`da4c8ca` (2026-07-03) — re-check `git diff da4c8ca..HEAD -- codex-rs/` before trusting details.
 
 High-level overview of the [openai/codex](https://github.com/openai/codex) repository — what it does, how it is built, how a request flows, and what it is built with.
 
-> How this note was produced: [case 005](../cases/005-learn-codex-repo/case.md) · flow: [learn-codebase-flow.md](learn-codebase-flow.md) · prompt: [learn-repo-overview.md](../prompts/learn-repo-overview.md)  
-> For a layer-by-layer walkthrough, see [layeredDesign.md](layeredDesign.md) (English) or [layeredDesign_cn.md](layeredDesign_cn.md) (中文).
+> How this note was produced: [case 005](../../cases/005-learn-codex-repo/case.md) · flow: [learn-codebase-flow.md](../method/learn-codebase-flow.md) · prompt: [learn-repo-overview.md](../../prompts/learn-repo-overview.md)  
+> For a layer-by-layer walkthrough, see [layered-design.md](layered-design.md) (English) or [layered-design_zh.md](layered-design_zh.md) (中文).
 
 ---
 
@@ -251,8 +255,8 @@ The `codex` binary is the single entry point; everything else follows one rhythm
 
 ### This repo (codex-labs)
 
-- [layeredDesign.md](layeredDesign.md) / [layeredDesign_cn.md](layeredDesign_cn.md) — layer-by-layer architecture walkthrough
-- [resources/links.md](../resources/links.md) / [links_zh.md](../resources/links_zh.md) — curated external links
+- [layered-design.md](layered-design.md) / [layered-design_zh.md](layered-design_zh.md) — layer-by-layer architecture walkthrough
+- [resources/links.md](../../resources/links.md) / [links_zh.md](../../resources/links_zh.md) — curated external links
 
 ### [openai/codex](https://github.com/openai/codex) on GitHub
 

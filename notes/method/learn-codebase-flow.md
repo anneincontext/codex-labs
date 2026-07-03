@@ -1,10 +1,13 @@
 # Learn a codebase — prompt to result
 
-**English** | [中文](learn-codebase-flow_cn.md)
+**English** | [中文](learn-codebase-flow_zh.md)
+
+> **Answers:** how to turn "learn a repo with Codex" into durable notes (the flow this lab uses).
+> **Read first:** nothing — transferable method, not tied to a codebase version.
 
 How a **learning session** chains together: your prompt, what Codex does at runtime, and the durable output in `notes/`.
 
-> Case: [005-learn-codex-repo](../cases/005-learn-codex-repo/case.md) · Prompt: [learn-repo-overview.md](../prompts/learn-repo-overview.md) · Example output: [architecture.md](architecture.md)
+> Case: [005-learn-codex-repo](../../cases/005-learn-codex-repo/case.md) · Prompt: [learn-repo-overview.md](../../prompts/learn-repo-overview.md) · Example output: [architecture.md](../codex/architecture.md)
 
 ---
 
@@ -41,7 +44,7 @@ flowchart TD
   end
 
   subgraph phaseC["Phase C — Cache"]
-    C1["Write or refine notes/\n(e.g. architecture, layeredDesign)"]
+    C1["Write or refine notes/\n(e.g. architecture, layered-design)"]
     C2["Reuse next session — no re-exploration cost"]
     C1 --> C2
   end
@@ -61,7 +64,7 @@ The **first result** is the agent reply. The **result worth keeping** is Phase C
 
 ## 2. Codex runtime (one learning turn)
 
-When you ask for a repo overview, each turn roughly follows this path (see [architecture.md](architecture.md) for the full system):
+When you ask for a repo overview, each turn roughly follows this path (see [architecture.md](../codex/architecture.md) for the full system):
 
 ```mermaid
 flowchart TD
@@ -86,7 +89,7 @@ For **codebase learning**, the tool loop matters: the model reads `README`, mani
 
 ### IDE / SDK variants
 
-IDE, desktop, and the Python SDK use the same core loop over JSON-RPC (`app-server`): `thread/start` → `turn/start` → event stream → `turn/completed`. The TypeScript SDK instead wraps `codex exec --experimental-json` over stdin/stdout JSONL. See [architecture.md § How a Request Flows](architecture.md#how-a-request-flows).
+IDE, desktop, and the Python SDK use the same core loop over JSON-RPC (`app-server`): `thread/start` → `turn/start` → event stream → `turn/completed`. The TypeScript SDK instead wraps `codex exec --experimental-json` over stdin/stdout JSONL. See [architecture.md § How a Request Flows](../codex/architecture.md#how-a-request-flows).
 
 ---
 
@@ -99,7 +102,7 @@ flowchart TD
   turn -->|your follow-ups| notes["notes/\n(durable)"]
 ```
 
-[Case 004](../cases/004-bigtech-infra/case.md): interviewee said Codex helps with **code interpretation**. [Case 005](../cases/005-learn-codex-repo/case.md): Anne tried it on [openai/codex](https://github.com/openai/codex) → **codex-labs** caches the notes.
+[Case 004](../../cases/004-bigtech-infra/case.md): interviewee said Codex helps with **code interpretation**. [Case 005](../../cases/005-learn-codex-repo/case.md): Anne tried it on [openai/codex](https://github.com/openai/codex) → **codex-labs** caches the notes.
 
 ---
 
@@ -119,7 +122,7 @@ flowchart TD
 
 | Doc                                                         | Role                                  |
 | ----------------------------------------------------------- | ------------------------------------- |
-| [learn-repo-overview.md](../prompts/learn-repo-overview.md) | Copy-paste bootstrap prompt           |
-| [architecture.md](architecture.md)                          | What Codex *is* (learned via this flow) |
-| [layeredDesign.md](layeredDesign.md)                        | Phase B zoom on Codex layers          |
+| [learn-repo-overview.md](../../prompts/learn-repo-overview.md) | Copy-paste bootstrap prompt           |
+| [architecture.md](../codex/architecture.md)                          | What Codex *is* (learned via this flow) |
+| [layered-design.md](../codex/layered-design.md)                        | Phase B zoom on Codex layers          |
 | [agents-md.md](agents-md.md)                                | Ongoing constraints after bootstrap   |

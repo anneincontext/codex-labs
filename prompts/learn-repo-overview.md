@@ -3,7 +3,7 @@
 **English** | [中文](learn-repo-overview_zh.md)
 
 **Case:** [cases/005-learn-codex-repo/case.md](../cases/005-learn-codex-repo/case.md)  
-**Flow (prompt → result):** [notes/learn-codebase-flow.md](../notes/learn-codebase-flow.md)  
+**Flow (prompt → result):** [notes/method/learn-codebase-flow.md](../notes/method/learn-codebase-flow.md)  
 **Target repo (example):** [openai/codex](https://github.com/openai/codex)
 
 First prompt Anne used to learn a large unfamiliar repo with Codex. Works on any codebase you can open in the agent's workspace.

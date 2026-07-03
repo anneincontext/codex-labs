@@ -56,4 +56,4 @@ Phase C (every edit): AGENTS.md   →  habits / taste / limits
 
 **Pattern:** one strong bootstrap prompt, then many small steering turns — not one megaprompt for the whole project.
 
-See [notes/agents-md.md](../../notes/agents-md.md) for the full model.
+See [notes/method/agents-md.md](../../notes/method/agents-md.md) for the full model.

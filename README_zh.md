@@ -17,6 +17,9 @@ codex-labs/
 │   └── …
 ├── experiments/
 ├── notes/
+│   ├── codex/       # 研究 openai/codex
+│   ├── method/      # 可迁移方法论
+│   └── research/    # 田野调查
 └── resources/
 ```
 
@@ -33,7 +36,7 @@ notes / resources   ─────────── 原理与参考资料
 | 文档               | English                                  | 中文                                   |
 | ------------------ | ---------------------------------------- | -------------------------------------- |
 | 本 lab 工作约定    | [AGENTS.md](AGENTS.md)                   | [AGENTS_zh.md](AGENTS_zh.md)           |
-| AGENTS.md 约束什么 | [notes/agents-md.md](notes/agents-md.md) | [notes/agents-md_cn.md](notes/agents-md_cn.md) |
+| AGENTS.md 约束什么 | [notes/method/agents-md.md](notes/method/agents-md.md) | [notes/method/agents-md_zh.md](notes/method/agents-md_zh.md) |
 
 ## 从这里开始
 
@@ -41,11 +44,11 @@ notes / resources   ─────────── 原理与参考资料
 
 | 主题                               | English                                                        | 中文                                                           |
 | ---------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------- |
-| 学习代码库（prompt → 结果）        | [notes/learn-codebase-flow.md](notes/learn-codebase-flow.md)   | [notes/learn-codebase-flow_cn.md](notes/learn-codebase-flow_cn.md) |
-| Codex 架构                         | [notes/architecture.md](notes/architecture.md)                | [notes/architecture_cn.md](notes/architecture_cn.md)            |
-| 分层架构                           | [notes/layeredDesign.md](notes/layeredDesign.md)             | [notes/layeredDesign_cn.md](notes/layeredDesign_cn.md)         |
-| AGENTS.md 约束什么                 | [notes/agents-md.md](notes/agents-md.md)                     | [notes/agents-md_cn.md](notes/agents-md_cn.md)                 |
-| 田野调研（三次语音访谈）           | [notes/real-workflows.md](notes/real-workflows.md)           | [notes/real-workflows_cn.md](notes/real-workflows_cn.md)       |
+| 学习代码库（prompt → 结果）        | [notes/method/learn-codebase-flow.md](notes/method/learn-codebase-flow.md)   | [notes/method/learn-codebase-flow_zh.md](notes/method/learn-codebase-flow_zh.md) |
+| Codex 架构                         | [notes/codex/architecture.md](notes/codex/architecture.md)                | [notes/codex/architecture_zh.md](notes/codex/architecture_zh.md)            |
+| 分层架构                           | [notes/codex/layered-design.md](notes/codex/layered-design.md)             | [notes/codex/layered-design_zh.md](notes/codex/layered-design_zh.md)         |
+| AGENTS.md 约束什么                 | [notes/method/agents-md.md](notes/method/agents-md.md)                     | [notes/method/agents-md_zh.md](notes/method/agents-md_zh.md)                 |
+| 田野调研（三次语音访谈）           | [notes/research/real-workflows.md](notes/research/real-workflows.md)           | [notes/research/real-workflows_zh.md](notes/research/real-workflows_zh.md)       |
 
 ### 案例
 

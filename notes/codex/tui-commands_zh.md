@@ -2,7 +2,11 @@
 
 [English](tui-commands.md) | **中文**
 
-Codex 终端 UI 里用户能用的「指令」：聊天里的 **`/slash`**、**`!` shell**、**快捷键**。接口分层见 [tui-interface-design_cn.md](tui-interface-design_cn.md)。
+> **回答什么：** TUI 提供哪些 slash 命令和快捷键、代码在哪。
+> **读者前置：** 无；设计原理见 [tui-interface-design_zh.md](tui-interface-design_zh.md)。
+> **校验基准：** [openai/codex](https://github.com/openai/codex)@`da4c8ca`（2026-07-03）——引用细节前先 `git diff da4c8ca..HEAD -- codex-rs/` 确认是否漂移。
+
+Codex 终端 UI 里用户能用的「指令」：聊天里的 **`/slash`**、**`!` shell**、**快捷键**。接口分层见 [tui-interface-design_zh.md](tui-interface-design_zh.md)。
 
 > **官方文档（优先对照）：** [CLI Slash commands](https://developers.openai.com/codex/cli/slash-commands) · [CLI 命令行参数](https://developers.openai.com/codex/cli/reference) · [CLI Features](https://developers.openai.com/codex/cli/features)  
 > **源码枚举：** [`codex-rs/tui/src/slash_command.rs`](https://github.com/openai/codex/blob/main/codex-rs/tui/src/slash_command.rs)（弹窗顺序与 feature 门控以此为准）  
@@ -180,5 +184,5 @@ flowchart LR
 
 | 文档 | 链接 |
 | ---- | ---- |
-| TUI 接口设计 | [tui-interface-design_cn.md](tui-interface-design_cn.md) |
-| 架构总览 | [architecture_cn.md](architecture_cn.md) |
+| TUI 接口设计 | [tui-interface-design_zh.md](tui-interface-design_zh.md) |
+| 架构总览 | [architecture_zh.md](architecture_zh.md) |

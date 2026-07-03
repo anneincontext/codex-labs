@@ -3,7 +3,7 @@
 [English](learn-repo-overview.md) | **中文**
 
 **案例：** [cases/005-learn-codex-repo/case_zh.md](../cases/005-learn-codex-repo/case_zh.md)  
-**链路（prompt → 结果）：** [notes/learn-codebase-flow_cn.md](../notes/learn-codebase-flow_cn.md)  
+**链路（prompt → 结果）：** [notes/method/learn-codebase-flow_zh.md](../notes/method/learn-codebase-flow_zh.md)  
 **示例仓库：** [openai/codex](https://github.com/openai/codex)
 
 Anne 用 Codex 学习大型陌生仓库时的第一个 prompt。在 agent 能打开工作区的任何代码库上都适用。

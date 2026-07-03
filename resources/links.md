@@ -32,5 +32,5 @@
 
 - [Skills index](../skills/README.md) / [中文](../skills/README_zh.md)
 - [Workflows index](../workflows/README.md) / [中文](../workflows/README_zh.md)
-- [Architecture overview](../notes/architecture.md) / [中文](../notes/architecture_cn.md)
-- [Layered design](../notes/layeredDesign.md) / [中文](../notes/layeredDesign_cn.md)
+- [Architecture overview](../notes/codex/architecture.md) / [中文](../notes/codex/architecture_zh.md)
+- [Layered design](../notes/codex/layered-design.md) / [中文](../notes/codex/layered-design_zh.md)

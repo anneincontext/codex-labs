@@ -4,7 +4,7 @@
 
 **Type:** Voice interview / field notes  
 **Source:** Voice chat with the interviewee  
-**Synthesis:** [notes/real-workflows.md](../../notes/real-workflows.md)  
+**Synthesis:** [notes/research/real-workflows.md](../../notes/research/real-workflows.md)  
 **Related cases:** [003-fintech-doc-pipeline](../003-fintech-doc-pipeline/case.md) · [004-bigtech-infra](../004-bigtech-infra/case.md)
 
 ---
@@ -40,5 +40,5 @@ Two colleagues resolve Git conflicts **manually** — they had not realized an a
 | Observation          | In the lab                                               |
 | -------------------- | -------------------------------------------------------- |
 | PM steer at each hop | `workflows/` human gates                                 |
-| Global AGENTS.md     | [AGENTS.md](../../AGENTS.md), [agents-md.md](../../notes/agents-md.md) |
-| Awareness gap        | [notes/real-workflows.md](../../notes/real-workflows.md) |
+| Global AGENTS.md     | [AGENTS.md](../../AGENTS.md), [agents-md.md](../../notes/method/agents-md.md) |
+| Awareness gap        | [notes/research/real-workflows.md](../../notes/research/real-workflows.md) |

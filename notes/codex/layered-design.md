@@ -1,6 +1,10 @@
 # Codex Layered Architecture
 
-**English** | [中文](layeredDesign_cn.md)
+**English** | [中文](layered-design_zh.md)
+
+> **Answers:** how the crates layer, and what each layer is responsible for.
+> **Read first:** [architecture.md](architecture.md).
+> **Verified against:** [openai/codex](https://github.com/openai/codex)@`da4c8ca` (2026-07-03) — re-check `git diff da4c8ca..HEAD -- codex-rs/` before trusting details.
 
 A layer-by-layer walkthrough of the Codex repository. For the crate-by-crate map and request flow, see [architecture.md](architecture.md).
 
@@ -240,8 +244,8 @@ Example: "Fix this test" from VS Code:
 
 ### This repo (codex-labs)
 
-- [architecture.md](architecture.md) / [architecture_cn.md](architecture_cn.md) — repository architecture overview
-- [resources/links.md](../resources/links.md) / [links_zh.md](../resources/links_zh.md) — curated external links
+- [architecture.md](architecture.md) / [architecture_zh.md](architecture_zh.md) — repository architecture overview
+- [resources/links.md](../../resources/links.md) / [links_zh.md](../../resources/links_zh.md) — curated external links
 
 ### [openai/codex](https://github.com/openai/codex) on GitHub
 

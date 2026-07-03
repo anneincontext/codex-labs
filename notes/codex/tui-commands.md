@@ -1,6 +1,10 @@
 # TUI commands — slash, shell, shortcuts
 
-**English** | [中文](tui-commands_cn.md)
+**English** | [中文](tui-commands_zh.md)
+
+> **Answers:** what slash commands and shortcuts the TUI offers, and where they live in code.
+> **Read first:** none; see [tui-interface-design.md](tui-interface-design.md) for the design behind them.
+> **Verified against:** [openai/codex](https://github.com/openai/codex)@`da4c8ca` (2026-07-03) — re-check `git diff da4c8ca..HEAD -- codex-rs/` before trusting details.
 
 User-facing **commands** in the Codex terminal UI: chat **`/slash`**, **`!` shell**, and **keyboard shortcuts**. For layering see [tui-interface-design.md](tui-interface-design.md).
 

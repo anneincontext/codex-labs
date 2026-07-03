@@ -41,7 +41,7 @@
 - 直接写在 markdown 里：用 ` ```mermaid ` 代码块（GitHub 原生渲染）。
 - 双语：标签不同时，中英文各文档各放一块 ` ```mermaid `。
 - 一张图讲清一条流；步骤型流程优先 `flowchart TD`。
-- 示例：[notes/learn-codebase-flow_cn.md](notes/learn-codebase-flow_cn.md)。
+- 示例：[notes/method/learn-codebase-flow_zh.md](notes/method/learn-codebase-flow_zh.md)。
 
 ### 提交前
 

@@ -6,12 +6,43 @@
 
 不是会话复盘（`cases/`），也不是可直接跑的模板（`prompts/`）。
 
-| 主题                               | English                              | 中文                                 |
-| ---------------------------------- | ------------------------------------ | ------------------------------------ |
-| 学习代码库（prompt → 结果）        | [learn-codebase-flow.md](learn-codebase-flow.md) | [learn-codebase-flow_cn.md](learn-codebase-flow_cn.md) |
-| 架构总览                           | [architecture.md](architecture.md)   | [architecture_cn.md](architecture_cn.md) |
-| 分层架构                           | [layeredDesign.md](layeredDesign.md) | [layeredDesign_cn.md](layeredDesign_cn.md) |
-| TUI 接口设计（`codex-tui`）        | [tui-interface-design.md](tui-interface-design.md) | [tui-interface-design_cn.md](tui-interface-design_cn.md) |
-| TUI 指令（slash / 快捷键）         | [tui-commands.md](tui-commands.md)                 | [tui-commands_cn.md](tui-commands_cn.md)                 |
-| AGENTS.md 约束什么                 | [agents-md.md](agents-md.md)         | [agents-md_cn.md](agents-md_cn.md)   |
-| 真实世界工作流（三次语音访谈）     | [real-workflows.md](real-workflows.md) | [real-workflows_cn.md](real-workflows_cn.md) |
+## 目录组织
+
+```text
+notes/
+├── codex/      # 「openai/codex 是怎么做的？」— 研究对象笔记
+├── method/     # 「我该怎么和 agent 协作？」— 可迁移方法论
+└── research/   # 「别人在怎么用 AI？」    — 田野调查
+```
+
+每篇笔记开头都有档案头：**回答什么**（解决什么问题）、**读者前置**（先读什么），`codex/` 类笔记额外带**校验基准**（结论核对时的上游 commit；代码笔记会过期，方法论笔记不会）。
+
+## 从这里开始——按目的选
+
+| 你想… | 读这个 |
+| ----- | ------ |
+| 快速建立 openai/codex 全貌 | [codex/architecture_zh.md](codex/architecture_zh.md) *(hub——其他 codex/ 笔记都从它分出)* |
+| 理解 crate 分层 | [codex/layered-design_zh.md](codex/layered-design_zh.md) |
+| 看终端 UI 怎么设计的 | [codex/tui-interface-design_zh.md](codex/tui-interface-design_zh.md) |
+| 查 TUI slash 命令 / 快捷键 | [codex/tui-commands_zh.md](codex/tui-commands_zh.md) |
+| 学「用 agent 读懂一个仓库」（本 lab 的工作流） | [method/learn-codebase-flow_zh.md](method/learn-codebase-flow_zh.md) |
+| 写好一份 AGENTS.md | [method/agents-md_zh.md](method/agents-md_zh.md) |
+| 了解从业者实际怎么用 AI 工具 | [research/real-workflows_zh.md](research/real-workflows_zh.md) |
+
+## 全部笔记
+
+| 笔记 | English | 中文 |
+| ---- | ------- | ---- |
+| 架构总览 | [codex/architecture.md](codex/architecture.md) | [codex/architecture_zh.md](codex/architecture_zh.md) |
+| 分层设计 | [codex/layered-design.md](codex/layered-design.md) | [codex/layered-design_zh.md](codex/layered-design_zh.md) |
+| TUI 接口设计 | [codex/tui-interface-design.md](codex/tui-interface-design.md) | [codex/tui-interface-design_zh.md](codex/tui-interface-design_zh.md) |
+| TUI 指令 | [codex/tui-commands.md](codex/tui-commands.md) | [codex/tui-commands_zh.md](codex/tui-commands_zh.md) |
+| 学习代码库（prompt → 结果） | [method/learn-codebase-flow.md](method/learn-codebase-flow.md) | [method/learn-codebase-flow_zh.md](method/learn-codebase-flow_zh.md) |
+| AGENTS.md 约束什么 | [method/agents-md.md](method/agents-md.md) | [method/agents-md_zh.md](method/agents-md_zh.md) |
+| 真实世界工作流（三次访谈） | [research/real-workflows.md](research/real-workflows.md) | [research/real-workflows_zh.md](research/real-workflows_zh.md) |
+
+## 约定
+
+- **英文版为准，`_zh.md` 镜像跟随。** 同一次改动里两边一起更新。
+- **Hub-and-spoke：** 深潜笔记只链回自己的 hub（`codex/architecture_zh.md`），不要每篇互链。
+- **`codex/` 笔记带「校验基准」commit** ——引用细节前，先在上游跑 `git diff <commit>..HEAD -- codex-rs/` 看有没有漂移。

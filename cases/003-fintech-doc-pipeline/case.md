@@ -4,7 +4,7 @@
 
 **Type:** Voice interview / field notes  
 **Source:** Voice chat with the interviewee  
-**Synthesis:** [notes/real-workflows.md](../../notes/real-workflows.md)  
+**Synthesis:** [notes/research/real-workflows.md](../../notes/research/real-workflows.md)  
 **Related cases:** [002-biotech-swe](../002-biotech-swe/case.md) · [004-bigtech-infra](../004-bigtech-infra/case.md)
 
 ---

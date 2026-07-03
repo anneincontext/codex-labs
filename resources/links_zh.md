@@ -32,5 +32,5 @@
 
 - [Skills 索引](../skills/README_zh.md) / [English](../skills/README.md)
 - [Workflows 索引](../workflows/README_zh.md) / [English](../workflows/README.md)
-- [架构总览](../notes/architecture_cn.md) / [English](../notes/architecture.md)
-- [分层架构](../notes/layeredDesign_cn.md) / [English](../notes/layeredDesign.md)
+- [架构总览](../notes/codex/architecture_zh.md) / [English](../notes/codex/architecture.md)
+- [分层架构](../notes/codex/layered-design_zh.md) / [English](../notes/codex/layered-design.md)

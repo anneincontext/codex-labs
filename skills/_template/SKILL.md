@@ -24,4 +24,4 @@ One sentence: what this skill produces.
 
 Optional project rules to respect (tests, package manager, ask-before-deps).
 
-See [notes/agents-md.md](../../notes/agents-md.md).
+See [notes/method/agents-md.md](../../notes/method/agents-md.md).

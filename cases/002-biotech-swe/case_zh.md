@@ -4,7 +4,7 @@
 
 **类型：** 语音访谈 / 田野笔记  
 **来源：** 与受访者语音聊天  
-**提炼：** [notes/real-workflows_cn.md](../../notes/real-workflows_cn.md)  
+**提炼：** [notes/research/real-workflows_zh.md](../../notes/research/real-workflows_zh.md)  
 **相关案例：** [003-fintech-doc-pipeline](../003-fintech-doc-pipeline/case_zh.md) · [004-bigtech-infra](../004-bigtech-infra/case_zh.md)
 
 ---
@@ -37,4 +37,4 @@ JIRA → Cursor 生成代码
 | ---------------- | -------------------------------------------------------- |
 | 每步 PM/开发掌舵 | `workflows/` 人工关卡                                    |
 | 全局 AGENTS.md   | [AGENTS_zh.md](../../AGENTS_zh.md) 模式                   |
-| 认知缺口         | [notes/real-workflows_cn.md](../../notes/real-workflows_cn.md) |
+| 认知缺口         | [notes/research/real-workflows_zh.md](../../notes/research/real-workflows_zh.md) |

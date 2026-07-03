@@ -56,4 +56,4 @@
 
 **模式：** 一次强 bootstrap prompt，再多轮小步掌舵 — 不要用一个大 prompt 扛整个项目。
 
-完整模型见 [notes/agents-md_cn.md](../../notes/agents-md_cn.md)。
+完整模型见 [notes/method/agents-md_zh.md](../../notes/method/agents-md_zh.md)。
