@@ -84,9 +84,9 @@ prompt → UserInput → context → model ↔ tools(repo) → streamed reply �
 
 For **codebase learning**, the tool loop matters: the model reads `README`, manifests, crate layout, entry points — then synthesizes your five bullets. It is not only pretraining.
 
-### IDE / SDK variant
+### IDE / SDK variants
 
-Same core loop over JSON-RPC (`app-server`): `thread/start` → `turn/start` → event stream → `turn/completed`. See [architecture.md § How Requests Flow](architecture.md#how-requests-flow-through-the-system).
+IDE, desktop, and the Python SDK use the same core loop over JSON-RPC (`app-server`): `thread/start` → `turn/start` → event stream → `turn/completed`. The TypeScript SDK instead wraps `codex exec --experimental-json` over stdin/stdout JSONL. See [architecture.md § How a Request Flows](architecture.md#how-a-request-flows).
 
 ---
 

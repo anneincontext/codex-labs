@@ -28,10 +28,10 @@
 │ codex-cli (binary)                                                          │
 │      │                                                                      │
 │      ├─► codex-tui           interactive terminal UI                        │
-│      ├─► codex app-server    JSON-RPC (IDE, desktop, SDKs)                  │
+│      ├─► codex app-server    JSON-RPC (IDE, desktop, Python SDK)            │
 │      └─► codex exec          headless / CI mode                             │
 │                                                                             │
-│ SDKs (TypeScript, Python) ─────────────────────────────► app-server         │
+│ TypeScript SDK ──► codex exec JSONL    Python SDK ──► app-server stdio      │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
                                        ▼
@@ -42,7 +42,7 @@
 │      │                                                                      │
 │      ├─ codex-protocol       shared Op / Event / config types               │
 │      ├─ codex-tools          tool specs, routing, execution                 │
-│      └─ thread-store         SQLite persistence + rollout traces            │
+│      └─ thread-store         rollout JSONL + SQLite metadata                │
 │                                                                             │
 │ Codex = queue pair:  submit(Op) ──► session loop ──► receive(Event)         │
 └───────────┬─────────────────┬─────────────────┬─────────────────┬───────────┘
@@ -52,7 +52,7 @@
     │   codex-api   │ │  exec-server  │ │   codex-mcp   │ │  sandboxing   │
     │    OpenAI     │ │  subprocess   │ │   MCP tool    │ │macOS Seatbelt │
     │   Responses   │ │     / PTY     │ │    servers    │ │  Linux bwrap  │
-    │   API (SSE)   │ │ local/remote  │ │               │ │  Win restr.   │
+    │ SSE/WebSocket │ │ local/remote  │ │               │ │  Win restr.   │
     └───────────────┘ └───────────────┘ └───────────────┘ └───────────────┘
 ```
 
@@ -154,7 +154,7 @@ pub struct Codex {
 
 1. 输入作为 `Op::UserInput` 进入提交队列。
 2. Session 组装模型上下文：系统指令、skills、git 信息、memories，以及可用工具。
-3. `codex-api` 调用 **OpenAI Responses API**，SSE 流式接收 `ResponseEvent`。
+3. `codex-api` 调用 **OpenAI Responses API**；core 通过支持 SSE 和 WebSocket 的路径消费流式 `ResponseEvent`。
 4. 模型输出以 `Event` 流回——消息增量、推理、工具调用。
 5. 遇到工具调用时，`ToolRouter` 分发到对应处理器（shell、`apply_patch`、文件搜索、MCP……）；命令在沙箱中运行，策略要求时**暂停等待审批**。
 6. 工具结果回灌模型；第 3–6 步重复，直到 turn 结束。
@@ -162,9 +162,9 @@ pub struct Codex {
 
 **三个接入面只在「输入如何到达、event 如何渲染」上有区别：**
 
-- **TUI**（`codex`）——[`codex-tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) 把输入/event 直接接到 core。
-- **app-server**（`codex app-server`）——同一套循环，走 **JSON-RPC 2.0**（stdio/JSONL、unix socket 或 websocket），面向 IDE、桌面和 SDK。
-- **无头**（`codex exec`）——提交 prompt，跑循环，打印结构化输出后退出。
+- **TUI**（`codex`）——[`codex-tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) 默认使用 app-server client 加内嵌的 in-process app-server，保留 app-server 语义，但不需要单独进程。
+- **app-server**（`codex app-server`）——同一套循环，走 **JSON-RPC 2.0**（stdio/JSONL、unix socket 或 websocket），面向 IDE、桌面和 Python SDK。
+- **无头**（`codex exec`）——提交 prompt，跑循环，打印结构化输出后退出；TypeScript SDK 通过 stdin/stdout JSONL 包装这一模式。
 
 app-server 消息交互：
 
@@ -221,14 +221,14 @@ Codex 在两个方向上都讲 **Model Context Protocol**。
 | **语言** | Rust（主）、TypeScript（SDK、npm 包装）、Python（SDK） |
 | **异步运行时** | Tokio |
 | **终端 UI** | ratatui + crossterm |
-| **LLM API** | OpenAI Responses API（SSE 流式） |
+| **LLM API** | OpenAI Responses API（SSE 和 WebSocket 流式路径） |
 | **协议** | JSON-RPC 2.0、JSONL、MCP（Model Context Protocol） |
-| **持久化** | SQLite（threads）、rollout 追踪文件 |
+| **持久化** | rollout JSONL 历史；SQLite state DB 用于可查询 metadata |
 | **沙箱** | macOS Seatbelt、Linux bubblewrap、Windows restricted-token sandbox |
 | **远程执行** | WebSocket + Noise 加密 relay（exec-server 远程模式） |
 | **构建** | Cargo workspace + Bazel；`just` 用于开发命令 |
 | **包管理** | pnpm（Node）、Cargo（Rust） |
-| **测试** | `insta` 快照测试（TUI）、`core/suite` 集成测试 |
+| **测试** | `insta` 快照测试（TUI）、`core/tests/suite` 集成测试 |
 | **可观测性** | OpenTelemetry（`codex-otel`）、结构化 tracing |
 | **Schema** | 配置的 JSON Schema；app-server API 的 TypeScript 生成 |
 

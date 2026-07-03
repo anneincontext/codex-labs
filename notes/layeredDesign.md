@@ -86,7 +86,7 @@ A single **turn** in core roughly follows these steps:
 
 1. Receive `Op::UserInput`
 2. **Build context**: system instructions, skills, plugins, git info, memories, MCP tools, etc.
-3. Call the **OpenAI Responses API** via `codex-api`, consuming SSE `ResponseEvent`s
+3. Call the **OpenAI Responses API** via `codex-api`; consume streaming `ResponseEvent`s through SSE and WebSocket-capable paths
 4. Parse **tool calls** from the stream and hand them to `ToolRouter`
 5. When needed, emit **approval requests** (shell, patches, network) and wait for `Op::ExecApproval`, etc.
 6. Feed tool results back to the model; loop until the turn completes
@@ -100,18 +100,18 @@ A single **turn** in core roughly follows these steps:
 
 ## ④ API client — `codex-api` + `codex-client`
 
-**Role:** The **network layer** to the **OpenAI Responses API** — requests, SSE streaming, retries, auth headers.
+**Role:** The **network layer** to the **OpenAI Responses API** — request models, SSE parsing, WebSocket-capable streaming, retries, auth headers.
 
 Division of labor:
 
 | Crate | Responsibility |
 |-------|----------------|
 | `codex-client` | Generic HTTP transport |
-| `codex-api` | Request bodies for Responses / Compact / Memory APIs, SSE parsing, `ResponseEvent` streams |
+| `codex-api` | Request bodies for Responses / Compact / Memory APIs, SSE parsing, `ResponseEvent` stream types |
 
 Core assembles `instructions`, `input`, and `tools`, then hands off to this layer. What comes back are structured `ResponseEvent`s (text deltas, function calls, completion signals, etc.).
 
-**Why this layer matters:** "How we talk to OpenAI" is separated from business logic. Endpoint changes, retries, and SSE parsing mostly touch this layer, not session/turn code.
+**Why this layer matters:** "How we talk to OpenAI" is separated from business logic. Endpoint changes, retries, SSE parsing, and streaming transport details mostly touch this layer and the core model client, not session/turn code.
 
 ---
 
@@ -168,7 +168,7 @@ Core **pulls these in** when building context and registering tools, but impleme
 
 ## ⑧ IDE integration — `app-server` + `app-server-protocol`
 
-**Role:** The **external API layer** for rich clients (VS Code extension, desktop app, TypeScript/Python SDKs).
+**Role:** The **external API layer** for rich clients (VS Code extension, desktop app, Python SDK).
 
 Unlike the TUI, this layer does not render a terminal. Instead:
 
@@ -189,7 +189,7 @@ initialize → thread/start → turn/start → receive item/* notifications → 
 
 `app-server-protocol` defines v1/v2 API types and can generate TypeScript schemas so IDEs stay aligned with CLI versions.
 
-**Why this layer matters:** Core is wrapped as a **stable, versioned RPC surface** so editors and SDKs do not need to embed the Rust TUI.
+**Why this layer matters:** Core is wrapped as a **stable, versioned RPC surface** so editors and app-server clients do not need to embed the Rust TUI. The TypeScript SDK is the exception: it wraps `codex exec --experimental-json` over stdin/stdout JSONL instead of app-server.
 
 ---
 

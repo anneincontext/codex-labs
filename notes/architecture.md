@@ -28,10 +28,10 @@ A **Rust-first monorepo** ([`codex-rs/`](https://github.com/openai/codex/tree/ma
 │ codex-cli (binary)                                                          │
 │      │                                                                      │
 │      ├─► codex-tui           interactive terminal UI                        │
-│      ├─► codex app-server    JSON-RPC (IDE, desktop, SDKs)                  │
+│      ├─► codex app-server    JSON-RPC (IDE, desktop, Python SDK)            │
 │      └─► codex exec          headless / CI mode                             │
 │                                                                             │
-│ SDKs (TypeScript, Python) ─────────────────────────────► app-server         │
+│ TypeScript SDK ──► codex exec JSONL    Python SDK ──► app-server stdio      │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
                                        ▼
@@ -42,7 +42,7 @@ A **Rust-first monorepo** ([`codex-rs/`](https://github.com/openai/codex/tree/ma
 │      │                                                                      │
 │      ├─ codex-protocol       shared Op / Event / config types               │
 │      ├─ codex-tools          tool specs, routing, execution                 │
-│      └─ thread-store         SQLite persistence + rollout traces            │
+│      └─ thread-store         rollout JSONL + SQLite metadata                │
 │                                                                             │
 │ Codex = queue pair:  submit(Op) ──► session loop ──► receive(Event)         │
 └───────────┬─────────────────┬─────────────────┬─────────────────┬───────────┘
@@ -52,7 +52,7 @@ A **Rust-first monorepo** ([`codex-rs/`](https://github.com/openai/codex/tree/ma
     │   codex-api   │ │  exec-server  │ │   codex-mcp   │ │  sandboxing   │
     │    OpenAI     │ │  subprocess   │ │   MCP tool    │ │macOS Seatbelt │
     │   Responses   │ │     / PTY     │ │    servers    │ │  Linux bwrap  │
-    │   API (SSE)   │ │ local/remote  │ │               │ │  Win restr.   │
+    │ SSE/WebSocket │ │ local/remote  │ │               │ │  Win restr.   │
     └───────────────┘ └───────────────┘ └───────────────┘ └───────────────┘
 ```
 
@@ -154,7 +154,7 @@ Every surface runs the **same core loop** — one turn:
 
 1. Input arrives as `Op::UserInput` on the submission queue.
 2. The session assembles model context: instructions, skills, git info, memories, and the available tools.
-3. `codex-api` calls the **OpenAI Responses API**, streaming `ResponseEvent`s (SSE).
+3. `codex-api` calls the **OpenAI Responses API**; core consumes streaming `ResponseEvent`s through SSE and WebSocket-capable paths.
 4. Model output streams back as `Event`s — message deltas, reasoning, tool calls.
 5. On a tool call, `ToolRouter` dispatches to a handler (shell, `apply_patch`, file search, MCP, …); commands run through the sandbox, **pausing for approval** when policy requires.
 6. Tool results feed back into the model; steps 3–6 repeat until the turn completes.
@@ -162,9 +162,9 @@ Every surface runs the **same core loop** — one turn:
 
 **The three surfaces differ only in how input arrives and events are rendered:**
 
-- **TUI** (`codex`) — [`codex-tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) wires input/events directly to core.
-- **app-server** (`codex app-server`) — the same loop over **JSON-RPC 2.0** (stdio/JSONL, unix socket, or websocket) for IDEs, desktop, and SDKs.
-- **Headless** (`codex exec`) — submit a prompt, run the loop, print structured output, exit.
+- **TUI** (`codex`) — [`codex-tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) uses the app-server client with an embedded in-process app-server by default, so it keeps app-server semantics without requiring a separate process.
+- **app-server** (`codex app-server`) — the same loop over **JSON-RPC 2.0** (stdio/JSONL, unix socket, or websocket) for IDEs, desktop, and the Python SDK.
+- **Headless** (`codex exec`) — submit a prompt, run the loop, print structured output, exit; the TypeScript SDK wraps this mode over stdin/stdout JSONL.
 
 app-server message exchange:
 
@@ -221,14 +221,14 @@ Codex speaks the **Model Context Protocol on both sides**.
 | **Language**           | Rust (primary), TypeScript (SDKs, npm wrapper), Python (SDK)       |
 | **Async runtime**      | Tokio                                                              |
 | **Terminal UI**        | ratatui + crossterm                                                |
-| **LLM API**            | OpenAI Responses API (SSE streaming)                               |
+| **LLM API**            | OpenAI Responses API (SSE and WebSocket streaming paths)            |
 | **Protocols**          | JSON-RPC 2.0, JSONL, MCP (Model Context Protocol)                  |
-| **Persistence**        | SQLite (threads), rollout trace files                              |
+| **Persistence**        | rollout JSONL history; SQLite state DB for queryable metadata       |
 | **Sandboxing**         | macOS Seatbelt, Linux bubblewrap, Windows restricted-token sandbox |
 | **Remote execution**   | WebSocket + Noise-encrypted relay (exec-server remote mode)        |
 | **Build**              | Cargo workspace + Bazel; `just` for dev commands                   |
 | **Package management** | pnpm (Node), Cargo (Rust)                                          |
-| **Testing**            | `insta` snapshot tests (TUI), integration tests in `core/suite`    |
+| **Testing**            | `insta` snapshot tests (TUI), integration tests in `core/tests/suite`    |
 | **Observability**      | OpenTelemetry (`codex-otel`), structured tracing                   |
 | **Schema**             | JSON Schema for config; TypeScript generation for app-server API   |
 
