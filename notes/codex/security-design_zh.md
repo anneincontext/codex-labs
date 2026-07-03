@@ -1,8 +1,8 @@
-# Codex 安全设计 — 沙箱、审批与权限
+# Codex 安全设计 - 沙箱、审批与权限
 
 [English](security-design.md) | **中文**
 
-> **回答什么：** Codex 如何把「权限画像、审批、execpolicy、OS 沙箱、网络代理」叠成纵深防御；危险操作（shell / patch）在源码里怎么走。
+> **回答什么：** Codex 如何把 agent 动作变成受边界约束的 runtime 决策：权限画像定义能力边界，审批策略定义什么时候问，execpolicy 给命令分类，平台沙箱强制文件系统/网络限制，客户端负责展示审批请求。
 > **读者前置：** [architecture_zh.md](architecture_zh.md) · [layered-design_zh.md](layered-design_zh.md)。
 > **校验基准：** [openai/codex](https://github.com/openai/codex)@`da4c8ca`（2026-07-03）——引用细节前先 `git diff da4c8ca..HEAD -- codex-rs/` 确认是否漂移。
 
@@ -14,218 +14,269 @@
 
 ## 一句话
 
-**不是单一开关。** Agent 动系统前要先过 **权限画像 + 审批策略 + execpolicy 规则**；执行时再套 **平台沙箱**；出站网络走 **托管代理**；用户显式的 **`!` shell** 和部分 API **刻意不走** agent 沙箱。
+Codex 的安全边界不是模型承诺，也不是单个 sandbox 开关。它是一条 runtime 管线：**权限画像**限定能访问什么，**审批策略**决定是否需要用户或 reviewer 同意，**execpolicy**给命令风险分类，**平台沙箱**强制文件系统/网络限制，**网络代理 / Guardian / 客户端**补上审查、审计和 UI 中介。
+
+`full-access`、用户 `!` shell、`process/spawn`、`External` profile 都是显式的信任边界出口。它们是刻意设计的 escape hatch，不是普通 agent 执行路径。
 
 ---
 
-## 纵深防御（源码里的层）
+## 心智模型
 
 ```mermaid
 flowchart TD
-  config["config.toml\npermissions / approval_policy"]
-  req["requirements.toml\n企业约束"]
+  request["agent tool call\nshell / patch / mcp / permissions"]
+  config["config + requirements\npermission profiles, approval policy"]
   profile["PermissionProfile\n文件系统 + 网络"]
-  approval["AskForApproval\n何时弹窗"]
-  execpolicy["execpolicy *.rules\nallow / prompt / forbidden"]
-  hooks["permission hooks\n可选短路"]
+  approval["AskForApproval\n哪些 prompt 被允许"]
+  rules["execpolicy\nallow / prompt / forbidden"]
   guardian["Guardian 或用户审批"]
-  sandbox["SandboxManager\nSeatbelt / bwrap / Windows"]
-  netproxy["network-proxy\n域名策略"]
-  mcp["MCP / app tool policy"]
+  sandbox["SandboxManager\nSeatbelt / Linux sandbox / Windows"]
+  net["托管网络代理\n策略 + 审批 + 审计"]
+  exec["实际执行"]
+  client["TUI / app-server / MCP\n展示审批并回传决定"]
 
   config --> profile
-  req --> profile
-  profile --> approval
-  approval --> execpolicy
-  execpolicy --> hooks
-  hooks --> guardian
+  config --> approval
+  request --> rules
+  profile --> rules
+  approval --> rules
+  rules --> guardian
+  guardian <--> client
   guardian --> sandbox
-  sandbox --> netproxy
-  netproxy --> mcp
+  profile --> sandbox
+  sandbox --> net
+  net --> exec
 ```
 
-| 层 | 主要 crate / 文件 | 做什么 |
-| -- | ----------------- | ------ |
-| 权限画像 | `protocol/src/models.rs`、`config/permissions_toml.rs` | 能读/写哪、网开不开 |
-| 审批策略 | `protocol/src/protocol.rs` | 什么时候必须问人 |
-| 命令规则 | `execpolicy/`、`core/src/exec_policy.rs` | Starlark 匹配每条 shell |
-| 编排中枢 | `core/src/tools/orchestrator.rs` | 审批 → 沙箱 → 执行 → 失败可升级 |
-| 平台沙箱 | `sandboxing/`、`linux-sandbox/`、`windows-sandbox-rs/` | OS 级隔离 |
-| 网络 | `codex-network-proxy`、`core/tools/network_approval.rs` | 出站审批与持久化规则 |
-| Guardian | `core/src/guardian/` | 可选自动审查子 agent |
-| 客户端 | `app-server`、`tui`、`mcp-server` | 审批 UI ↔ JSON-RPC |
+重点不是一条纯线性链路，而是多路 fan-in：`PermissionProfile`、`AskForApproval`、execpolicy rules、单 turn 授权和平台能力会在执行时一起合成最终决策。
 
 ---
 
-## 权限画像：`PermissionProfile`
+## 源码地图
 
-运行时边界的**核心类型**（`protocol/src/models.rs`）：
+| 层 | 主要源码 | 重点看什么 |
+| -- | -------- | ---------- |
+| 权限画像 | `codex-rs/protocol/src/models.rs` | `PermissionProfile::{Managed, Disabled, External}` 和内置 ID |
+| 文件系统 / 网络策略 | `codex-rs/protocol/src/permissions.rs` | `FileSystemSandboxPolicy`、`NetworkSandboxPolicy`、受保护 metadata |
+| 配置编译 | `codex-rs/core/src/config/permissions.rs`、`codex-rs/config/src/permissions_toml.rs` | 内置 profile 解析、自定义 profile 继承 |
+| 审批 preset | `codex-rs/utils/approval-presets/src/lib.rs` | UI 无关的 read-only/default/full-access preset |
+| 命令策略 | `codex-rs/core/src/exec_policy.rs`、`codex-rs/execpolicy/` | allow/prompt/forbidden、prefix amendment |
+| 工具编排 | `codex-rs/core/src/tools/sandboxing.rs`、`codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs` | 审批需求、追加权限、denied-read 保持 |
+| 平台沙箱 | `codex-rs/sandboxing/`、`codex-rs/linux-sandbox/`、`codex-rs/windows-sandbox-rs/` | Seatbelt、bubblewrap/seccomp/Landlock、Windows restricted token/elevated wrapper |
+| 网络 | `codex-rs/network-proxy/`、`codex-rs/core/src/tools/network_approval.rs` | 托管代理、host 决策、网络审批流 |
+| Guardian | `codex-rs/core/src/guardian/` | 自动 reviewer、fail-closed 审查、有上限的 transcript |
+| 客户端 | `codex-rs/app-server/`、`codex-rs/tui/`、`codex-rs/mcp-server/` | JSON-RPC 审批请求和 UI/elicitation 接线 |
+| secrets / hardening | `codex-rs/secrets/`、`codex-rs/login/`、`codex-rs/process-hardening/` | 尽力脱敏、auth 存储、pre-main 进程加固 |
+
+---
+
+## 权限画像：能力边界
+
+`PermissionProfile` 是主要的能力边界：
 
 | 变体 | 含义 |
 | ---- | ---- |
-| `Managed { file_system, network }` | Codex 自己构建沙箱（最常见） |
-| `Disabled` | 不套外层沙箱 |
-| `External { network }` | 文件系统由外部隔离；Codex 只处理声明的网络策略 |
+| `Managed { file_system, network }` | Codex 负责用平台沙箱和网络策略执行限制 |
+| `Disabled` | 没有 Codex 外层沙箱；对应 danger/full access |
+| `External { network }` | 文件系统隔离由外部负责；Codex 仍记录声明的网络状态 |
 
 内置 profile ID：
 
-| ID | 典型用途 |
-| -- | -------- |
-| `:read-only` | 以读为主 |
-| `:workspace` | 工作区可写（常见默认） |
-| `:danger-full-access` | 高权限；企业常限制 |
+| ID | runtime 形态 |
+| -- | ------------ |
+| `:read-only` | 文件系统受限只读，网络 restricted |
+| `:workspace` | workspace 可写，网络默认 restricted，除非配置启用 |
+| `:danger-full-access` | `PermissionProfile::Disabled` |
 
-**文件系统**（`protocol/src/permissions.rs`）：路径条目 `read` / `write` / `deny`（**deny 优先**）；支持 `:workspace_roots`、`:tmpdir` 等特殊路径。可写根下 **`.git`、`.codex`、`.agents`** 等有默认保护，避免 agent 改元数据。
+文件系统条目使用 `read`、`write`、`deny`。当同等具体程度的条目冲突时，`deny` 优先于 `write`，`write` 优先于 `read`。特殊路径包括 `:root`、`:minimal`、`:workspace_roots`、`:tmpdir`、`:slash_tmp`。
 
-**网络**：`NetworkSandboxPolicy` 为 `restricted`（默认）或 `enabled`；域名细则在 `permissions_toml` 配置。官方：[Permissions](https://developers.openai.com/codex/permissions)。
+另一个关键点是 workspace metadata 保护：即使 workspace 可写，顶层 `.git`、`.agents`、`.codex` 也很敏感，因为它们能影响 hooks、指令或 Codex 行为。在 restricted 模式下，agent 写这些路径会被拦，除非策略显式给该 metadata 路径写权限。
 
 ---
 
-## 何时弹窗：`AskForApproval`
+## 审批策略：prompt 边界
 
-定义在 `protocol/src/protocol.rs`：
+`AskForApproval` 回答的是另一个问题：不是“能访问什么”，而是“这里是否允许 Codex 请求同意”。
 
 | 值 | 行为 |
 | -- | ---- |
-| `unless-trusted`（`untrusted`） | 仅「已知安全且只读」自动过；其余都问 |
-| `on-request`（**默认**） | 策略/模型认为需要就问 |
-| `granular({...})` | 按类开关（见下表） |
-| `never` | 不问用户；危险命令直接 forbidden 或失败回模型 |
+| `untrusted` / `unless-trusted` | 只自动放行已知安全且只读的命令；其余要问 |
+| `on-request` | 当策略或 sandbox escalation 需要时询问 |
+| `granular({...})` | 按 prompt 类型单独允许或拒绝 |
+| `never` | 不询问；需要审批的流程会变成 forbidden 或错误返回 |
 
-`GranularApprovalConfig` 可单独控制：
+`GranularApprovalConfig` 目前控制：
 
 | 字段 | 控制什么 |
 | ---- | -------- |
-| `sandbox_approval` | shell / 提权沙箱请求 |
-| `rules` | execpolicy 的 `prompt` 规则 |
-| `skill_approval` | skill 脚本执行 |
-| `request_permissions` | `request_permissions` 工具 |
-| `mcp_elicitations` | MCP 交互式审批 |
+| `sandbox_approval` | sandbox escape / shell escalation prompt |
+| `rules` | execpolicy `prompt` 规则 |
+| `skill_approval` | skill 脚本审批 |
+| `request_permissions` | 独立 `request_permissions` 工具 prompt |
+| `mcp_elicitations` | MCP elicitation prompt |
 
-还可选 **`approvals_reviewer`**：`user`（默认）或 `auto_review`（Guardian 子 agent 先审）。
+`approvals_reviewer` 决定审批请求交给谁。`user` 会展示给人；`auto_review` 会在支持的流程中交给 Guardian 做基于风险的 allow/deny。
+
+---
+
+## Preset：产品模式只是组合
+
+UI 里看到的审批模式，本质是审批策略 + 权限画像的小组合：
+
+| Preset | 审批 | 权限画像 |
+| ------ | ---- | -------- |
+| Read Only | `on-request` | `:read-only` |
+| Default / Agent mode | `on-request` | `:workspace` |
+| Full Access | `never` | `:danger-full-access` / `Disabled` |
+
+所以 “default” 不是“不问问题”，而是 workspace 可写、网络受限，并且越界动作需要审批。
 
 ---
 
 ## 命令规则：execpolicy
 
-`codex-execpolicy` 用 Starlark `prefix_rule`：
+Agent shell 执行前会先被分类。`core/src/exec_policy.rs` 会解析命令，包括 `bash -lc` 这类常见 shell wrapper，然后执行 execpolicy 规则。结果会变成：
 
-```starlark
-prefix_rule(
-    pattern = ["git", "status"],
-    decision = "prompt",   # allow | prompt | forbidden
-    justification = "…",
-)
-```
-
-- 多规则冲突取**最严**决策  
-- `host_executable` 可约束「`git` 只能从哪些绝对路径执行」  
-- 规则文件：`~/.codex/rules/`、项目 `rules/*.rules`  
-- 本地检查：`codex execpolicy check`  
-
-`core/src/exec_policy.rs` 在跑命令前解析 argv（含 `bash -lc` 包装），产出 `ExecApprovalRequirement`：`Skip` / `NeedsApproval` / `Forbidden`。
-
----
-
-## 执行编排：`ToolOrchestrator`
-
-`core/src/tools/orchestrator.rs` 模块注释：
-
-> approval → select sandbox → attempt → retry with escalated sandbox on denial
-
-```mermaid
-flowchart TD
-  eval["execpolicy + AskForApproval\n+ PermissionProfile"]
-  hooks["permission hooks"]
-  approve["Guardian 或\nExecApprovalRequest"]
-  pick["SandboxManager\n选 SandboxType"]
-  run["沙箱内执行"]
-  deny{"沙箱拒绝?"}
-  retry["策略允许时\n再 prompt 无沙箱重试"]
-
-  eval --> hooks --> approve --> pick --> run --> deny
-  deny -->|是且允许| retry
-  deny -->|否| done["返回结果"]
-  retry --> done
-```
-
-**Patch（`apply_patch`）** 走同一编排器；另有按路径的审批缓存（`core/tools/runtimes/apply_patch.rs`）。
-
----
-
-## 平台沙箱：`SandboxManager`
-
-`SandboxType`（`sandboxing/src/manager.rs`）：
-
-| 变体 | 平台 | 实现要点 |
-| ---- | ---- | -------- |
-| `MacosSeatbelt` | macOS | `/usr/bin/sandbox-exec` + `.sbpl` 模板 |
-| `LinuxSeccomp` | Linux | `codex-linux-sandbox`：bubblewrap + seccomp（Landlock 可选） |
-| `WindowsRestrictedToken` | Windows | `codex-windows-sandbox` restricted token / elevated |
-| `None` | 任意 | 无外层沙箱 |
-
-| 平台 | 备注 |
+| 结果 | 含义 |
 | ---- | ---- |
-| Linux | 默认 ro-bind `/`，可写根单独 bind；WSL1 不支持 bwrap |
-| Windows | `windows_sandbox`：`disabled` / `restricted-token` / `elevated` |
-| 远程 | `exec-server` 收 `FileSystemSandboxContext`，在远端复用变换逻辑 |
+| `Skip` | 不需要审批 |
+| `NeedsApproval` | 需要问用户或 Guardian |
+| `Forbidden` | 不 prompt，直接拒绝 |
 
-Linux 细节见 [linux-sandbox README](https://github.com/openai/codex/blob/main/codex-rs/linux-sandbox/README.md)。
+规则可以产出 `allow`、`prompt`、`forbidden`。被批准的 prompt 还可以提出 amendment，让未来匹配的命令跳过重复审批。
+
+两个防御细节值得注意：
+
+- 复杂解析仍参与规则判断，但如果只有复杂 fallback parser 命中，Codex 不会自动生成持久化 amendment。
+- 过宽的 prefix suggestion 会被禁止，比如 `python -c`、`bash -lc`、`sudo`、`node -e` 等，因为批准它们几乎等于批准任意代码。
 
 ---
 
-## 网络与 MCP
+## 工具执行流
 
-### 托管网络代理
+主 agent 的 `exec_command` 路径大致是：
 
-Turn 带 `NetworkProxy` 时，出站经 `codex-network-proxy`：
+1. 解析工具参数，定位目标 environment/cwd。
+2. 根据有效文件系统/网络策略选择初始 sandbox 类型。
+3. 校验并规范化请求的 additional permissions。
+4. 必要时拦截 `apply_patch` 风格调用。
+5. 把 command、cwd、network proxy、sandbox permissions、approval metadata 交给 `UnifiedExecProcessManager` 执行。
+6. 如果 sandbox denial 已经是终态，就返回 denial output，而不是留下可恢复进程。
 
-- **Immediate** — 连接被拦就立刻审批  
-- **Deferred** — 命令成功后再批网络  
-- 用户可批单次或持久化 `NetworkPolicyAmendment`  
+这里最重要的不变量是：“approved” 不总是等于 “unsandboxed”。如果文件系统策略里有 denied-read 限制，绕过 sandbox 会丢掉 enforce deny-read 的唯一机制，所以 Codex 会保留 sandbox。
 
-逻辑在 `core/tools/network_approval.rs`；Guardian 可审 `NetworkAccess`。
+---
 
-### MCP
+## 平台沙箱：真正执行限制
 
-| 机制 | 位置 |
+`SandboxManager` 只在有效策略需要、且宿主平台支持时选择平台实现。
+
+| `SandboxType` | 平台 | 实现要点 |
+| ------------- | ---- | -------- |
+| `MacosSeatbelt` | macOS | `/usr/bin/sandbox-exec` + 生成的 SBPL |
+| `LinuxSeccomp` | Linux | `codex-linux-sandbox` wrapper、bubblewrap 文件系统视图、seccomp / Landlock 路径 |
+| `WindowsRestrictedToken` | Windows | Windows sandbox wrapper，restricted-token 或 elevated backend |
+| `None` | 任意 | 没有 Codex 平台沙箱 |
+
+几个重要细节：
+
+- macOS 固定使用绝对路径 `/usr/bin/sandbox-exec`，避免 PATH 注入。
+- Linux 把文件系统建模成默认只读，再叠加 writable roots；`.git`、`.agents`、`.codex` 即使在 writable root 下也保持保护。
+- Windows direct-spawn 请求会包一层 sandbox helper，并且 setup 环境变量使用窄 allowlist。
+- `External` 表示 Codex 不负责文件系统隔离；这个边界交给外部环境。
+
+---
+
+## 网络：独立的出站边界
+
+网络访问没有混进文件系统权限，而是单独的 `NetworkSandboxPolicy`：
+
+| 值 | 含义 |
+| -- | ---- |
+| `restricted` | 默认；出站网络被阻断或托管 |
+| `enabled` | 该 profile 拥有完整网络访问 |
+
+启用托管网络时，命令会收到 proxy 设置，流量走 `codex-network-proxy`。这个 proxy 有 host/domain 决策、审计事件和 blocked-request observer。被拦的 host 可以变成审批请求：
+
+| 决策 | 效果 |
 | ---- | ---- |
-| 连接器 `AppToolPolicy` | `connectors/src/app_tool_policy.rs` |
-| 工具调用 Guardian | `core/src/mcp_tool_call.rs` |
-| Elicitation 粒度 | `GranularApprovalConfig.mcp_elicitations` |
-| 入站 MCP 审批 | `mcp-server` · [codex_mcp_interface.md](https://github.com/openai/codex/blob/main/codex-rs/docs/codex_mcp_interface.md) |
+| allow once | 允许这一次请求 |
+| allow for session | 本 session 缓存 host/protocol/port |
+| deny | 阻断并返回拒绝 |
+
+当 `AskForApproval::Never` 时，网络审批流也不会启动；策略 miss 不能被转换成人类 prompt。
 
 ---
 
-## 客户端如何接上（app-server / TUI）
+## Guardian：自动 reviewer，不是 enforcement
+
+Guardian 是支持流程中的审批 reviewer。模块级契约是：
+
+1. 围绕当前动作重建有上限的 transcript。
+2. 让独立 review session 评估这个精确动作。
+3. 要求严格 JSON，包含 risk、authorization、outcome、rationale。
+4. 超时、执行失败、输出格式错误时 fail closed。
+5. 应用明确的 allow/deny outcome。
+
+Guardian 不是 sandbox。它可以批准或拒绝 prompt，但真正 enforcement 仍在正常的 tool/runtime/sandbox 路径里。
+
+---
+
+## 客户端接线：app-server / TUI / MCP
+
+客户端负责展示审批请求；它们不自己决定底层 policy。
 
 ```mermaid
 sequenceDiagram
   participant Core as codex-core
   participant AS as app-server
-  participant TUI as TUI
+  participant UI as TUI / MCP client
 
-  Core->>AS: ExecApprovalRequest 事件
-  AS->>TUI: item/commandExecution/requestApproval
-  TUI->>AS: accept / decline / acceptForSession …
-  AS->>Core: Op::ExecApproval
+  Core->>AS: item/commandExecution/requestApproval
+  AS->>UI: render command, cwd, reason, choices
+  UI->>AS: approved / approvedForSession / denied
+  AS->>Core: Op::ExecApproval or equivalent response
 ```
 
-Patch 对应 `item/fileChange/requestApproval` → `Op::PatchApproval`。  
-TUI **不**自己判安全，只展示与回传（见 [tui-interface-design_zh.md](tui-interface-design_zh.md)）。
+审批类型包括：
+
+| 请求 | 示例来源 |
+| ---- | -------- |
+| 命令执行 | `item/commandExecution/requestApproval` |
+| 文件变更 | `item/fileChange/requestApproval` |
+| 权限请求 | `item/permissions/requestApproval` |
+| MCP elicitation | `elicitation/create` / app-server request plumbing |
+| Guardian denied action override | `thread/approveGuardianDeniedAction` |
+
+MCP 审批处理偏保守：如果 exec approval response 无法解析，MCP server 会当作 denied。
 
 ---
 
-## 刻意不走 agent 沙箱的路径（重要）
+## 刻意绕过普通 agent 沙箱的路径
 
-| 路径 | 源码 / README 说明 |
-| ---- | ------------------ |
-| TUI **`!` shell** | `thread/shellCommand` — **无沙箱、全权限**，不继承 thread 沙箱 |
-| **`process/spawn`**（实验） | app-server README：明确无沙箱 |
-| **`External` 画像** | FS 由外部负责 |
-| **`PermissionProfile::Disabled`** | 不套外层沙箱 |
+这些路径按设计不属于普通 agent sandbox 语义：
 
-> Agent 的 `shell` 工具与用户的 `!` 是**两条路**；后者是「用户 shell」，不是 agent 工具链。
+| 路径 | 边界 |
+| ---- | ---- |
+| TUI `!` / `thread/shellCommand` | 用户主动发起的 shell command；无沙箱、全权限 |
+| `process/spawn` | 实验性 app-server process API；明确无沙箱 |
+| `PermissionProfile::Disabled` / `:danger-full-access` | 没有 Codex 外层沙箱 |
+| `PermissionProfile::External` | 文件系统隔离交给外部 sandbox |
+
+Agent `exec_command` 和用户 `!` shell 是不同信任边界。不要用其中一个推断另一个。
+
+---
+
+## Secrets、auth 与进程加固
+
+安全设计不只是 sandbox：
+
+- `codex-secrets` 会对常见 secret 形态做 best-effort 脱敏，例如 OpenAI key、AWS access key、Bearer token、`token/password/api_key` 赋值。
+- `login/src/auth/storage.rs` 支持 keyring auth storage；fallback 的 `auth.json` 在 Unix 下用 `0600` 权限写入。
+- `process-hardening` 在支持的 Unix 平台做 pre-main 加固：禁 core dump、尽量禁止 ptrace attach、移除 `LD_*` / `DYLD_*` 等危险动态加载环境变量。
+- app-server websocket auth 支持 capability token 和 signed bearer token；未认证的非 loopback listener 会被识别为不安全。
+
+这些是主 agent 执行路径周围的 defense-in-depth 控制。
 
 ---
 
@@ -233,29 +284,30 @@ TUI **不**自己判安全，只展示与回传（见 [tui-interface-design_zh.m
 
 ```toml
 approval_policy = "on-request"
-approvals_reviewer = "user"          # 或 auto_review
+approvals_reviewer = "user"
 
 default_permissions = ":workspace"
 
 [permissions.myprofile]
 extends = ":workspace"
+
 [permissions.myprofile.filesystem]
 ":workspace_roots" = "write"
-"/secrets" = "none"                  # deny
+"/secrets" = "deny"
+
 [permissions.myprofile.network]
 enabled = false
 ```
 
 | 配置源 | 作用 |
 | ------ | ---- |
-| `config.toml` | 默认权限、审批、Windows 沙箱级别 |
-| `rules/*.rules` | execpolicy；审批时可提议 amendment 持久化 allow |
-| `requirements.toml` | 企业锁：允许的 approval/sandbox/profile、托管 hooks、网络域名等 |
-| `thread/start`、`turn/start` | 单 thread / 单 turn 覆盖 approval、permissions |
+| `config.toml` | 本地默认值：审批策略、权限画像、Windows sandbox 设置 |
+| `permissions.*` profiles | 命名文件系统/网络策略，可继承 |
+| `rules/*.rules` | execpolicy 命令决策和持久化 amendment |
+| `requirements.toml` | 企业约束：profile、policy、network、rules 等 |
+| `thread/start`、`turn/start`、`command/exec` | API 级覆盖；优先用 `permissions` / `permissionProfile`，而不是旧 sandbox 字段 |
 
 官方：[Config reference](https://developers.openai.com/codex/config-reference) · [Permissions](https://developers.openai.com/codex/permissions) · [Sandboxing 概念](https://developers.openai.com/codex/concepts/sandboxing)。
-
-TUI `/permissions` 是改当前会话权限的 UI 入口，底层仍走 app-server 设置 API（见 [tui-commands_zh.md](tui-commands_zh.md)）。
 
 ---
 
@@ -263,11 +315,13 @@ TUI `/permissions` 是改当前会话权限的 UI 入口，底层仍走 app-serv
 
 | 问题 | 源码答案 |
 | ---- | -------- |
-| 默认有多严？ | `on-request` + `:workspace` + 平台沙箱 + 网络 restricted |
-| 谁决定能不能跑？ | execpolicy + `AskForApproval` + 权限几何 |
-| 谁决定跑在哪？ | `SandboxManager` 按 OS 包一层 |
-| 人不在 loop？ | `never` / granular 关某类；或 Guardian `auto_review` |
-| 最大洞？ | 用户 `!`、`process/spawn`、`danger-full-access` / Disabled |
+| 默认有多严？ | `on-request` + `:workspace` + 网络 restricted + 需要时的平台沙箱 |
+| 谁会挡住命令？ | execpolicy、审批策略、权限画像、sandbox 能力 |
+| 谁 enforce 文件访问？ | 平台沙箱 + 显式 metadata/write 检查 |
+| 谁 enforce 网络访问？ | network sandbox policy + 启用时的托管 proxy |
+| approved 命令还会在沙箱里吗？ | 会；denied-read 规则必须保持可 enforce |
+| 人不在 loop？ | `never`、granular 关闭某类 prompt，或配置了 Guardian `auto_review` |
+| 最大的显式出口？ | `!` shell、`process/spawn`、`:danger-full-access`、`External` |
 
 ---
 
