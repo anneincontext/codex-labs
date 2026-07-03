@@ -96,7 +96,7 @@ pub struct Codex {
 **前端 / 入口**
 
 - [`cli`](https://github.com/openai/codex/tree/main/codex-rs/cli) — `codex` 多合一二进制；解析子命令并分发
-- [`tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) — 交互式 Ratatui 终端 UI（无子命令时的默认）
+- [`tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) — 交互式 Ratatui 终端 UI（无子命令时的默认）；接口设计见 [tui-interface-design_cn.md](tui-interface-design_cn.md)
 - [`exec`](https://github.com/openai/codex/tree/main/codex-rs/exec) — 无头 `codex exec` 模式（CI/脚本）
 - [`mcp-server`](https://github.com/openai/codex/tree/main/codex-rs/mcp-server) — 把 Codex 自身作为 MCP server 通过 stdio 暴露
 - [`app-server`](https://github.com/openai/codex/tree/main/codex-rs/app-server) / [`app-server-protocol`](https://github.com/openai/codex/tree/main/codex-rs/app-server-protocol) — 支撑 IDE/桌面/SDK 的 JSON-RPC 服务 + v1/v2 API 类型

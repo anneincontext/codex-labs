@@ -11,5 +11,6 @@ Not session writeups (`cases/`), not runnable templates (`prompts/`).
 | Learn a codebase (prompt → result)        | [learn-codebase-flow.md](learn-codebase-flow.md) | [learn-codebase-flow_cn.md](learn-codebase-flow_cn.md) |
 | Architecture overview                     | [architecture.md](architecture.md)   | [architecture_cn.md](architecture_cn.md) |
 | Layered design                            | [layeredDesign.md](layeredDesign.md) | [layeredDesign_cn.md](layeredDesign_cn.md) |
+| TUI interface design (`codex-tui`)        | [tui-interface-design.md](tui-interface-design.md) | [tui-interface-design_cn.md](tui-interface-design_cn.md) |
 | What AGENTS.md constrains                 | [agents-md.md](agents-md.md)         | [agents-md_cn.md](agents-md_cn.md)   |
 | Real-world workflows (3 voice interviews) | [real-workflows.md](real-workflows.md) | [real-workflows_cn.md](real-workflows_cn.md) |

@@ -96,7 +96,7 @@ pub struct Codex {
 **Front ends / entry points**
 
 - [`cli`](https://github.com/openai/codex/tree/main/codex-rs/cli) — the `codex` multitool binary; parses subcommands and dispatches
-- [`tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) — interactive Ratatui terminal UI (default when no subcommand)
+- [`tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) — interactive Ratatui terminal UI (default when no subcommand); interface design: [tui-interface-design.md](tui-interface-design.md)
 - [`exec`](https://github.com/openai/codex/tree/main/codex-rs/exec) — headless `codex exec` mode (CI/scripts)
 - [`mcp-server`](https://github.com/openai/codex/tree/main/codex-rs/mcp-server) — exposes Codex itself as an MCP server over stdio
 - [`app-server`](https://github.com/openai/codex/tree/main/codex-rs/app-server) / [`app-server-protocol`](https://github.com/openai/codex/tree/main/codex-rs/app-server-protocol) — JSON-RPC server + v1/v2 API types backing IDE/desktop/SDK
