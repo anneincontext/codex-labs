@@ -22,6 +22,9 @@ codex-labs/
 │   └── release/
 ├── prompts/
 ├── cases/
+│   ├── _template/
+│   ├── 001-realtime-ai-presenter/
+│   └── …
 ├── experiments/
 ├── notes/
 └── resources/
@@ -50,7 +53,9 @@ notes / resources   ─────────── 原理与参考资料
 | Workflows 索引 | [workflows/README.md](workflows/README.md) | [workflows/README_zh.md](workflows/README_zh.md) |
 | Codex 架构 | [notes/architecture.md](notes/architecture.md) | [notes/architecture_cn.md](notes/architecture_cn.md) |
 | 精选链接 | [resources/links.md](resources/links.md) | [resources/links_zh.md](resources/links_zh.md) |
-| 案例模板 | [cases/TEMPLATE.md](cases/TEMPLATE.md) | [cases/TEMPLATE_zh.md](cases/TEMPLATE_zh.md) |
+| 案例索引 | [cases/README.md](cases/README.md) | [cases/README_zh.md](cases/README_zh.md) |
+| 案例模板 | [cases/_template/case.md](cases/_template/case.md) | [cases/_template/case_zh.md](cases/_template/case_zh.md) |
+| 田野调研（三次语音访谈） | [notes/real-workflows.md](notes/real-workflows.md) | [notes/real-workflows_cn.md](notes/real-workflows_cn.md) |
 
 ## Workflow 一览
 

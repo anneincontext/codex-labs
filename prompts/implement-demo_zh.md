@@ -3,10 +3,10 @@
 [English](implement-demo.md) | **中文**
 
 **Workflow：** [implement-feature](../workflows/implement-feature/) + [repo-understanding](../skills/repo-understanding/)  
-**案例：** [cases/001-realtime-ai-presenter.md](../cases/001-realtime-ai-presenter.md)  
+**案例：** [cases/001-realtime-ai-presenter/case_zh.md](../cases/001-realtime-ai-presenter/case_zh.md)  
 **产出仓库：** [realtime-ai-presenter](https://github.com/anneincontext/realtime-ai-presenter)
 
-来自 Anne 桌面的原始 prompt（`Demos/Realtime api 的 prompt.md`），用 Codex 启动该 demo。
+Anne 用 Codex 启动该 demo 时的 bootstrap prompt。
 
 ---
 

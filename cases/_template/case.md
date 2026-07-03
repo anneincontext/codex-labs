@@ -1,10 +1,13 @@
 # Case: <short title>
 
-**English** | [中文](TEMPLATE_zh.md)
+**English** | [中文](case_zh.md)
+
+**Type:** Own demo · Voice interview · …  
+**Source:** How you gathered this case (e.g. your Codex session, voice chat with someone)
 
 ## Skills / Workflow / Prompts
 
-Which [skills](../skills/), [workflow](../workflows/), and [prompts](../prompts/) did you use?
+Which [skills](../../skills/), [workflow](../../workflows/), and [prompts](../../prompts/) did you use?
 
 ## Context
 

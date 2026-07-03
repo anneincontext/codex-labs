@@ -81,4 +81,4 @@ Anne used [`Realtime api prompt`](../prompts/implement-demo.md) to **bootstrap**
 | `prompt.md` | First session (or big feature) | Product goal, base repo, success criteria, verification, scope caps |
 | `AGENTS.md` | Every later edit | Test habits, toolchain, dep approval, taste, anti-patterns |
 
-Case writeup: [cases/001-realtime-ai-presenter.md](../cases/001-realtime-ai-presenter.md).
+Case writeup: [cases/001-realtime-ai-presenter/case.md](../cases/001-realtime-ai-presenter/case.md).

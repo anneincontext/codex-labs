@@ -1,11 +1,14 @@
 # Case: Realtime AI Presenter demo
 
-**English** | [中文](001-realtime-ai-presenter_zh.md)
+**English** | [中文](case_zh.md)
+
+**Type:** Own demo (Anne's Codex session)  
+**Source:** Anne built this demo herself with Codex
 
 ## Skills / Workflow / Prompts
 
-- **Workflow:** [implement-feature](../workflows/implement-feature/)
-- **Prompt:** [prompts/implement-demo.md](../prompts/implement-demo.md) (source: `~/Desktop/Demos/Realtime api 的 prompt.md`)
+- **Workflow:** [implement-feature](../../workflows/implement-feature/)
+- **Prompt:** [prompts/implement-demo.md](../../prompts/implement-demo.md)
 - **Persistent rules:** [AGENTS.md](https://github.com/anneincontext/realtime-ai-presenter/blob/main/AGENTS.md)
 - **Repo:** [anneincontext/realtime-ai-presenter](https://github.com/anneincontext/realtime-ai-presenter)
 
@@ -15,13 +18,13 @@ Build a public-launch-style voice presenter on top of OpenAI's realtime-console 
 
 ## What I Asked Codex
 
-One structured prompt covering: objective, base repo, demo UX, stack prefs, success criteria, constraints, verification. See [implement-demo.md](../prompts/implement-demo.md).
+One structured prompt covering: objective, base repo, demo UX, stack prefs, success criteria, constraints, verification. See [implement-demo.md](../../prompts/implement-demo.md).
 
 ## Timeline
 
 | Phase | What happened | ~Time |
 | ----- | ------------- | ----- |
-| **Bootstrap** | One structured prompt ([implement-demo.md](../prompts/implement-demo.md)) → working demo on top of realtime-console | **~20 min** |
+| **Bootstrap** | One structured prompt ([implement-demo.md](../../prompts/implement-demo.md)) → working demo on top of realtime-console | **~20 min** |
 | **Polish** | Continued conversation — usability, edge cases, README shortcuts, presenter flow | Ongoing |
 
 The first pass got something **demoable** quickly because the prompt already specified base repo, success criteria, and verification. Follow-up turns were smaller asks, not re-explaining the whole product.
@@ -54,4 +57,4 @@ Phase C (every edit): AGENTS.md   →  habits / taste / limits
 
 **Pattern:** one strong bootstrap prompt, then many small steering turns — not one megaprompt for the whole project.
 
-See [notes/agents-md.md](../notes/agents-md.md) for the full model.
+See [notes/agents-md.md](../../notes/agents-md.md) for the full model.

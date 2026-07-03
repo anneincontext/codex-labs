@@ -22,6 +22,9 @@ codex-labs/
 │   └── release/
 ├── prompts/
 ├── cases/
+│   ├── _template/
+│   ├── 001-realtime-ai-presenter/
+│   └── …
 ├── experiments/
 ├── notes/
 └── resources/
@@ -50,7 +53,9 @@ notes / resources   ────────── theory & references
 | Workflows index | [workflows/README.md](workflows/README.md) | [workflows/README_zh.md](workflows/README_zh.md) |
 | Codex architecture | [notes/architecture.md](notes/architecture.md) | [notes/architecture_cn.md](notes/architecture_cn.md) |
 | Curated links | [resources/links.md](resources/links.md) | [resources/links_zh.md](resources/links_zh.md) |
-| Case template | [cases/TEMPLATE.md](cases/TEMPLATE.md) | [cases/TEMPLATE_zh.md](cases/TEMPLATE_zh.md) |
+| Cases index | [cases/README.md](cases/README.md) | [cases/README_zh.md](cases/README_zh.md) |
+| Case template | [cases/_template/case.md](cases/_template/case.md) | [cases/_template/case_zh.md](cases/_template/case_zh.md) |
+| Field research (3 voice interviews) | [notes/real-workflows.md](notes/real-workflows.md) | [notes/real-workflows_cn.md](notes/real-workflows_cn.md) |
 
 ## Workflows at a glance
 

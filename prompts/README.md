@@ -15,6 +15,6 @@ Templates that **trigger** a skill in [`skills/`](../skills/).
 | `architecture.md` | [`skills/architecture/`](../skills/architecture/) |
 | `testing.md` | [`skills/testing/`](../skills/testing/) |
 
-| `implement-demo.md` | Bootstrap a product demo ([case](../cases/001-realtime-ai-presenter.md)) |
+| `implement-demo.md` | Bootstrap a product demo ([case](../cases/001-realtime-ai-presenter/case.md)) |
 
 Workflows in [`workflows/`](../workflows/) link prompts per step.

@@ -1,10 +1,13 @@
 # 案例：<简短标题>
 
-[English](TEMPLATE.md) | **中文**
+[English](case.md) | **中文**
+
+**类型：** 自己的 demo · 语音访谈 · …  
+**来源：** 案例怎么来的（例如自己与 Codex 的会话、与某人语音聊天）
 
 ## Skills / Workflow / Prompts
 
-用了哪些 [skills](../skills/)、[workflow](../workflows/)、[prompts](../prompts/)？
+用了哪些 [skills](../../skills/)、[workflow](../../workflows/)、[prompts](../../prompts/)？
 
 ## 背景
 

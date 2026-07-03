@@ -3,10 +3,10 @@
 **English** | [中文](implement-demo_zh.md)
 
 **Skill:** [implement-feature](../workflows/implement-feature/) + [repo-understanding](../skills/repo-understanding/)  
-**Case:** [cases/001-realtime-ai-presenter.md](../cases/001-realtime-ai-presenter.md)  
+**Case:** [cases/001-realtime-ai-presenter/case.md](../cases/001-realtime-ai-presenter/case.md)  
 **Resulting repo:** [realtime-ai-presenter](https://github.com/anneincontext/realtime-ai-presenter)
 
-Original prompt from Anne's Desktop (`Demos/Realtime api 的 prompt.md`), used with Codex to bootstrap the demo.
+Bootstrap prompt Anne used with Codex to build the demo.
 
 ---
 

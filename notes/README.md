@@ -11,3 +11,4 @@ Not session writeups (`cases/`), not runnable templates (`prompts/`).
 | Architecture overview | [architecture.md](architecture.md) | [architecture_cn.md](architecture_cn.md) |
 | Layered design | [layeredDesign.md](layeredDesign.md) | [layeredDesign_cn.md](layeredDesign_cn.md) |
 | What AGENTS.md constrains | [agents-md.md](agents-md.md) | [agents-md_cn.md](agents-md_cn.md) |
+| Real-world workflows (3 voice interviews) | [real-workflows.md](real-workflows.md) | [real-workflows_cn.md](real-workflows_cn.md) |

@@ -1,11 +1,14 @@
 # 案例：Realtime AI Presenter demo
 
-[English](001-realtime-ai-presenter.md) | **中文**
+[English](case.md) | **中文**
+
+**类型：** 自己的 demo（Anne 与 Codex 的会话）  
+**来源：** Anne 自己做 demo
 
 ## Skills / Workflow / Prompts
 
-- **Workflow：** [implement-feature](../workflows/implement-feature/)
-- **Prompt：** [prompts/implement-demo_zh.md](../prompts/implement-demo_zh.md)（来源：`~/Desktop/Demos/Realtime api 的 prompt.md`）
+- **Workflow：** [implement-feature](../../workflows/implement-feature/)
+- **Prompt：** [prompts/implement-demo_zh.md](../../prompts/implement-demo_zh.md)
 - **持久规则：** [AGENTS.md](https://github.com/anneincontext/realtime-ai-presenter/blob/main/AGENTS.md)
 - **仓库：** [anneincontext/realtime-ai-presenter](https://github.com/anneincontext/realtime-ai-presenter)
 
@@ -15,13 +18,13 @@
 
 ## 我向 Codex 提了什么
 
-一份结构化 prompt：目标、基础仓库、演示交互、技术偏好、成功标准、约束、验收。见 [implement-demo_zh.md](../prompts/implement-demo_zh.md)。
+一份结构化 prompt：目标、基础仓库、演示交互、技术偏好、成功标准、约束、验收。见 [implement-demo_zh.md](../../prompts/implement-demo_zh.md)。
 
 ## 时间线
 
 | 阶段 | 发生了什么 | 约耗时 |
 | ---- | ---------- | ------ |
-| **启动** | 一份结构化 prompt（[implement-demo_zh.md](../prompts/implement-demo_zh.md)）→ 基于 realtime-console 的可运行 demo | **约 20 分钟** |
+| **启动** | 一份结构化 prompt（[implement-demo_zh.md](../../prompts/implement-demo_zh.md)）→ 基于 realtime-console 的可运行 demo | **约 20 分钟** |
 | **打磨** | 持续对话 — 可用性、边界情况、README 捷径、讲解流程 | 持续进行 |
 
 第一遍能很快「能演示」，是因为 prompt 里已经写清基础仓库、成功标准和验收方式；后续回合多是**小步追问**，不用重复讲 entire 产品。
@@ -54,4 +57,4 @@
 
 **模式：** 一次强 bootstrap prompt，再多轮小步掌舵 — 不要用一个大 prompt 扛整个项目。
 
-完整模型见 [notes/agents-md_cn.md](../notes/agents-md_cn.md)。
+完整模型见 [notes/agents-md_cn.md](../../notes/agents-md_cn.md)。
