@@ -254,11 +254,66 @@ flowchart LR
 
 ---
 
+## 对外 public API（`codex_tui` crate 边界）
+
+TUI **不定义** agent 协议；对外只暴露窄接口，供 `codex-cli`、`codex-cloud-tasks` 等复用。定义见 [`slash_command.rs` 之外的 `lib.rs` 重导出](https://github.com/openai/codex/blob/main/codex-rs/tui/src/lib.rs)。
+
+| 类别 | 类型 / 函数 | 用途 |
+| ---- | ----------- | ---- |
+| 启动 | `run_main` → `AppExitInfo` | 整次 TUI 会话 |
+| CLI | `Cli` | clap 参数 |
+| 退出 | `AppExitInfo`、`ExitReason`、`TokenUsage` | 退出摘要 |
+| 远程 | `resolve_remote_addr`、`remote_addr_supports_auth_token`、`RemoteAppServerEndpoint` | 连外部 app-server |
+| 归档 | `run_session_archive_command`、`SessionArchiveAction`… | `archive` / `delete` / `unarchive` |
+| 更新 | `UpdateAction`、`get_update_action` | 自更新 |
+| 错误 | `LocalStateDbStartupError` | state DB 启动失败 |
+| 复用组件 | `ComposerInput`、`ComposerAction` | 抽出输入框（cloud-tasks） |
+| 渲染工具 | `render_markdown_text`、`Terminal`、`insert_history_lines`、`RowBuilder` | markdown / scrollback / 换行 |
+
+**没有**对外暴露：`App`、`ChatWidget`、`AppEvent`、`Renderable`、`HistoryCell`。
+
+---
+
+## 内部架构 API（`pub(crate)`）
+
+| API | 作用 |
+| --- | ---- |
+| `AppEvent` | UI → `App` 协调（picker、配置、退出模式…） |
+| `AppCommand` | UI → agent（`UserTurn`、`Interrupt`、审批…） |
+| `TuiEvent` | 终端 → `App`（`Key` / `Paste` / `Draw` / `Resize`） |
+| `AppServerEvent` | app-server 推送 → `App` |
+| `Renderable` | 测量 + 绘制 + 光标 |
+| `HistoryCell` | transcript 单元 |
+| `BottomPaneView` | 底部弹层交互 |
+| `ChatWidget` | 聊天主屏门面 |
+| `AppServerSession` | JSON-RPC facade |
+
+---
+
+## 与官方 API 文档的对应关系
+
+TUI 运行时对话走 **app-server JSON-RPC**；slash / 快捷键是 **TUI 本地 UI**，多数再转成 app-server 方法。
+
+| 你想查的 | 官方文档 | 仓库内源码 / 笔记 |
+| -------- | -------- | ----------------- |
+| **App Server JSON-RPC**（thread/turn、审批、事件流） | [Codex App Server](https://developers.openai.com/codex/app-server) · 详尽版 [app-server README](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md) | `app_server_session.rs` · [architecture_cn.md](architecture_cn.md) |
+| 生成 schema / TS 类型 | `codex app-server generate-json-schema` / `generate-ts`（见 app-server README） | `codex-app-server-protocol` |
+| **CLI slash 命令**（用户可见列表） | [CLI Slash commands](https://developers.openai.com/codex/cli/slash-commands) | [tui-commands_cn.md](tui-commands_cn.md) · `slash_command.rs` |
+| CLI 参数与子命令 | [Command line reference](https://developers.openai.com/codex/cli/reference) | `codex-rs/cli` |
+| 交互模式 / 功能概览 | [CLI Features](https://developers.openai.com/codex/cli/features) | — |
+| 快捷键（`tui.keymap`） | 配置见 [Config reference](https://developers.openai.com/codex/config-reference) | `keymap.rs` · `/keymap` |
+| `!` shell 命令 | app-server：`thread/shellCommand`（[API Overview](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md#api-overview)） | composer `!` 前缀 |
+| 权限 / 沙箱 | [Permissions](https://developers.openai.com/codex/permissions) · [Agent approvals & security](https://developers.openai.com/codex/agent-approvals-security) | `/permissions` |
+| Codex 总入口 | [developers.openai.com/codex](https://developers.openai.com/codex) | — |
+
+---
+
 ## 相关文档
 
 | 文档 | 链接 |
 | ---- | ---- |
+| TUI 指令（slash / 快捷键） | [tui-commands_cn.md](tui-commands_cn.md) |
 | 架构地图 | [architecture_cn.md](architecture_cn.md) |
 | 分层详解 | [layeredDesign_cn.md](layeredDesign_cn.md) |
-| app-server RPC | [app-server README](https://github.com/openai/codex/tree/main/codex-rs/app-server) |
+| app-server RPC（仓库详尽版） | [app-server README](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md) |
 | TUI 样式 | [`codex-rs/tui/styles.md`](https://github.com/openai/codex/blob/main/codex-rs/tui/styles.md) |

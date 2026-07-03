@@ -254,11 +254,66 @@ flowchart LR
 
 ---
 
+## Public crate API (`codex_tui` boundary)
+
+The TUI does **not** define the agent protocol. It exports a narrow surface for `codex-cli`, `codex-cloud-tasks`, etc. See [`lib.rs` re-exports](https://github.com/openai/codex/blob/main/codex-rs/tui/src/lib.rs).
+
+| Category | Types / functions | Role |
+| -------- | ----------------- | ---- |
+| Launch | `run_main` → `AppExitInfo` | Full TUI session |
+| CLI | `Cli` | clap flags |
+| Exit | `AppExitInfo`, `ExitReason`, `TokenUsage` | Shutdown summary |
+| Remote | `resolve_remote_addr`, `remote_addr_supports_auth_token`, `RemoteAppServerEndpoint` | External app-server |
+| Archive | `run_session_archive_command`, `SessionArchiveAction`, … | `archive` / `delete` / `unarchive` |
+| Update | `UpdateAction`, `get_update_action` | Self-update |
+| Errors | `LocalStateDbStartupError` | State DB startup failure |
+| Reusable widget | `ComposerInput`, `ComposerAction` | Extracted composer (`cloud-tasks`) |
+| Render helpers | `render_markdown_text`, `Terminal`, `insert_history_lines`, `RowBuilder` | Markdown / scrollback / wrap |
+
+**Not exported:** `App`, `ChatWidget`, `AppEvent`, `Renderable`, `HistoryCell`.
+
+---
+
+## Internal architecture API (`pub(crate)`)
+
+| API | Role |
+| --- | ---- |
+| `AppEvent` | UI → `App` coordination |
+| `AppCommand` | UI → agent (`UserTurn`, `Interrupt`, approvals, …) |
+| `TuiEvent` | Terminal → `App` |
+| `AppServerEvent` | app-server push → `App` |
+| `Renderable` | Measure + paint + cursor |
+| `HistoryCell` | Transcript cell |
+| `BottomPaneView` | Footer modal interaction |
+| `ChatWidget` | Main chat facade |
+| `AppServerSession` | JSON-RPC facade |
+
+---
+
+## Mapping to official API docs
+
+Runtime chat goes through **app-server JSON-RPC**. Slash commands and shortcuts are **local TUI UI**, often translated into app-server methods.
+
+| Topic | Official docs | Repo / lab notes |
+| ----- | ------------- | -------------- |
+| **App Server JSON-RPC** | [Codex App Server](https://developers.openai.com/codex/app-server) · detailed [app-server README](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md) | `app_server_session.rs` · [architecture.md](architecture.md) |
+| Schema / TS generation | `codex app-server generate-json-schema` / `generate-ts` | `codex-app-server-protocol` |
+| **CLI slash commands** | [CLI Slash commands](https://developers.openai.com/codex/cli/slash-commands) | [tui-commands.md](tui-commands.md) · `slash_command.rs` |
+| CLI flags & subcommands | [Command line reference](https://developers.openai.com/codex/cli/reference) | `codex-rs/cli` |
+| Interactive features | [CLI Features](https://developers.openai.com/codex/cli/features) | — |
+| Keymap (`tui.keymap`) | [Config reference](https://developers.openai.com/codex/config-reference) | `keymap.rs` · `/keymap` |
+| `!` shell lines | app-server `thread/shellCommand` | composer `!` prefix |
+| Permissions / sandbox | [Permissions](https://developers.openai.com/codex/permissions) · [Agent approvals & security](https://developers.openai.com/codex/agent-approvals-security) | `/permissions` |
+| Codex hub | [developers.openai.com/codex](https://developers.openai.com/codex) | — |
+
+---
+
 ## Related docs
 
 | Doc | Link |
 | --- | ---- |
+| TUI commands (slash / shortcuts) | [tui-commands.md](tui-commands.md) |
 | Architecture map | [architecture.md](architecture.md) |
 | Crate layering | [layeredDesign.md](layeredDesign.md) |
-| App-server RPC surface | [app-server README](https://github.com/openai/codex/tree/main/codex-rs/app-server) |
+| App-server RPC (repo detail) | [app-server README](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md) |
 | TUI styling | [`codex-rs/tui/styles.md`](https://github.com/openai/codex/blob/main/codex-rs/tui/styles.md) |
