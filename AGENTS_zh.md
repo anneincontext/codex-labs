@@ -35,19 +35,18 @@
 - **中文 / 中英混排：** 按**显示宽度** padding（CJK 计 2 格，ASCII 计 1 格），不是按字符个数。
 - 简介放第二列；语言切换用行尾的 `· [中文]` / `· [English]`，省一列。
 
-### 流程图 — 用 [D2](https://d2lang.com/)
+### 流程图 — 用 [Mermaid](https://mermaid.js.org/)
 
 - **不要**手写 ASCII 框图做多步流程 — 尤其中文很难对齐。
-- 源文件放 `notes/diagrams/<topic>/`，扩展名 `.d2`；同时提交 `.svg` 方便 GitHub 预览。
-- 渲染：`d2 --layout dagre file.d2 file.svg`（见 [diagrams/learn-codebase-flow/README.md](notes/diagrams/learn-codebase-flow/README.md)）。
-- 双语：英文 `foo.d2` + `foo.svg`，中文 `foo_cn.d2` + `foo_cn.svg`（标签不同时）。
-- Markdown 嵌入：`![说明](diagrams/.../foo.svg)`，并附 **图源：** 链到 `.d2`。
+- 直接写在 markdown 里：用 ` ```mermaid ` 代码块（GitHub 原生渲染）。
+- 双语：标签不同时，中英文各文档各放一块 ` ```mermaid `。
+- 一张图讲清一条流；步骤型流程优先 `flowchart TD`。
 - 示例：[notes/learn-codebase-flow_cn.md](notes/learn-codebase-flow_cn.md)。
 
 ### 提交前
 
 - 在等宽编辑器里检查表格右边界。
-- 改过 `.d2` 后重新渲染，并把 `.svg` 一并提交。
+- 推送前在 GitHub 或支持 Mermaid 的编辑器里预览图表。
 
 ## 原则
 

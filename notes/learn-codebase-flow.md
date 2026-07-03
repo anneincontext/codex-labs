@@ -21,9 +21,33 @@ You care about both: the runtime produces the chat answer; the lab workflow turn
 
 ## 1. Lab workflow (prompt → durable result)
 
-![Lab workflow: Phase A → B → C](diagrams/learn-codebase-flow/lab-workflow.svg)
+```mermaid
+flowchart TD
+  subgraph phaseA["Phase A — Bootstrap"]
+    A1["Open target repo in Codex workspace"]
+    A2["learn-repo-overview prompt\n(what / arch / folders / flow / stack)"]
+    A3["Mental model in chat"]
+    A1 --> A2 --> A3
+  end
 
-Source: [lab-workflow.d2](diagrams/learn-codebase-flow/lab-workflow.d2) · drawn with [D2](https://d2lang.com/) (`d2 --layout dagre lab-workflow.d2 lab-workflow.svg`)
+  subgraph phaseB["Phase B — Zoom"]
+    B1["Diagram aligned to folder names"]
+    B2["One user turn end-to-end"]
+    B3["If changing X — read what first?"]
+    B4["One layer or one path per turn"]
+    B1 --> B4
+    B2 --> B4
+    B3 --> B4
+  end
+
+  subgraph phaseC["Phase C — Cache"]
+    C1["Write or refine notes/\n(e.g. architecture, layeredDesign)"]
+    C2["Reuse next session — no re-exploration cost"]
+    C1 --> C2
+  end
+
+  phaseA --> phaseB --> phaseC
+```
 
 | Phase | Input                       | Output                            |
 | ----- | --------------------------- | --------------------------------- |
@@ -39,9 +63,18 @@ The **first result** is the agent reply. The **result worth keeping** is Phase C
 
 When you ask for a repo overview, each turn roughly follows this path (see [architecture.md](architecture.md) for the full system):
 
-![Codex runtime: one learning turn](diagrams/learn-codebase-flow/codex-runtime.svg)
-
-Source: [codex-runtime.d2](diagrams/learn-codebase-flow/codex-runtime.d2) · [D2](https://d2lang.com/)
+```mermaid
+flowchart TD
+  you["You\n(prompt)"] --> cli["CLI / TUI"]
+  cli --> core["codex-core\nOp::UserInput"]
+  core --> context["Build context\n(AGENTS.md, cwd, thread, skills…)"]
+  context --> api["OpenAI Responses API\n(streaming)"]
+  api --> tools["Read / list / search repo"]
+  tools --> back["Tool results → model"]
+  back --> api
+  api --> ui["Stream events to UI"]
+  ui --> done["Turn complete\nthread persisted"]
+```
 
 **One line:**
 
@@ -59,9 +92,12 @@ Same core loop over JSON-RPC (`app-server`): `thread/start` → `turn/start` →
 
 ## 3. How the chains connect
 
-![How the two chains connect](diagrams/learn-codebase-flow/chains-connect.svg)
-
-Source: [chains-connect.d2](diagrams/learn-codebase-flow/chains-connect.d2) · [D2](https://d2lang.com/)
+```mermaid
+flowchart TD
+  prompt["Overview prompt\n(5 questions)"] --> turn["Codex turn(s)\nUserInput → context → API ↔ tools(repo)"]
+  turn -->|immediate| chat["Chat answer\n(immediate)"]
+  turn -->|your follow-ups| notes["notes/\n(durable)"]
+```
 
 [Case 004](../cases/004-bigtech-infra/case.md): interviewee said Codex helps with **code interpretation**. [Case 005](../cases/005-learn-codex-repo/case.md): Anne tried it on [openai/codex](https://github.com/openai/codex) → **codex-labs** caches the notes.
 

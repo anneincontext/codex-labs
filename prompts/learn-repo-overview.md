@@ -42,7 +42,7 @@ You are asking for a **map**, not a line-by-line tour. Follow-up turns can zoom 
 ## Suggested follow-ups (after the overview)
 
 ```text
-Draw a [D2](https://d2lang.com/) diagram of the request flow and align it with folder names.
+Draw a Mermaid diagram of the request flow and align it with folder names.
 
 Walk through one user turn end-to-end — which crates and files are involved?
 

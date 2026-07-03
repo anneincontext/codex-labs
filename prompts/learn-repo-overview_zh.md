@@ -44,7 +44,7 @@ Please explain:
 ## 建议的 follow-up（总览之后）
 
 ```text
-画一张 [D2](https://d2lang.com/) 请求流图，并和目录名对齐。
+画一张 Mermaid 请求流图，并和目录名对齐。
 
 跟完一次 user turn 端到端 — 涉及哪些 crate 和文件？
 

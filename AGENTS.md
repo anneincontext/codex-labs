@@ -35,19 +35,18 @@ Rules for Codex (and humans) maintaining this repository.
 - **Chinese / mixed text:** pad by **display width** (CJK characters count as 2; ASCII as 1), not raw character count.
 - Long descriptions belong in the second column; keep a compact `· [中文]` / `· [English]` lang link at the end.
 
-### Flow diagrams — use [D2](https://d2lang.com/)
+### Flow diagrams — use [Mermaid](https://mermaid.js.org/)
 
 - Do **not** hand-draw ASCII box diagrams for multi-step flows — they are hard to align (especially with Chinese text).
-- Put sources in `notes/diagrams/<topic>/` as `.d2` files; commit matching `.svg` for GitHub preview.
-- Render: `d2 --layout dagre file.d2 file.svg` (see [diagrams/learn-codebase-flow/README.md](notes/diagrams/learn-codebase-flow/README.md)).
-- Bilingual notes: English `foo.d2` + `foo.svg` and Chinese `foo_cn.d2` + `foo_cn.svg` when labels differ.
-- Embed in markdown: `![caption](diagrams/.../foo.svg)` plus a **Source:** link to the `.d2` file.
+- Embed inline in markdown: a fenced ` ```mermaid ` code block (GitHub renders it natively).
+- Bilingual notes: separate ` ```mermaid ` blocks per language when labels differ (EN doc vs CN doc).
+- Keep diagrams focused — one flow per block; prefer `flowchart TD` for step-by-step paths.
 - Example: [notes/learn-codebase-flow.md](notes/learn-codebase-flow.md).
 
 ### Before committing
 
 - Check table right edges in a fixed-width editor.
-- After editing `.d2`, re-render and commit the `.svg` too.
+- Preview Mermaid on GitHub or in an editor with Mermaid support before pushing.
 
 ## Principles
 
