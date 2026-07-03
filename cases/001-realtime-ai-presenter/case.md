@@ -7,7 +7,6 @@
 
 ## Skills / Workflow / Prompts
 
-- **Workflow:** [implement-feature](../../workflows/implement-feature/)
 - **Prompt:** [prompts/implement-demo.md](../../prompts/implement-demo.md)
 - **Persistent rules:** [AGENTS.md](https://github.com/anneincontext/realtime-ai-presenter/blob/main/AGENTS.md)
 - **Repo:** [anneincontext/realtime-ai-presenter](https://github.com/anneincontext/realtime-ai-presenter)

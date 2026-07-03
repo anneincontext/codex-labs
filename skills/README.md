@@ -4,32 +4,15 @@
 
 Reusable **capabilities** — atomic things Codex (and you) can do well.
 
-```text
-skills/
-├── debugging/           # narrow repro, logs, root cause, fix proposals
-├── code-review/         # read diffs, risks, style, merge readiness
-├── repo-understanding/  # map layout, entry points, conventions
-├── documentation/       # READMEs, guides, clear prose
-├── architecture/        # system design notes, diagrams, tradeoffs
-└── testing/             # test plans, coverage gaps, flaky tests
-```
+**Status:** Empty for now. Add skills here as real patterns emerge from [cases/](../cases/).
 
-| Skill | Folder | Status |
-| ----- | ------ | ------ |
-| Debugging | [debugging/](debugging/) | SKILL + checklist + [prompt](../prompts/debugging.md) |
-| Code review | [code-review/](code-review/) | README only |
-| Repo understanding | [repo-understanding/](repo-understanding/) | README only |
-| Documentation | [documentation/](documentation/) | README only |
-| Architecture | [architecture/](architecture/) | README only |
-| Testing | [testing/](testing/) | README only |
-
-Copy [_template/](_template/) when adding a skill: `SKILL.md` + `checklist.md`.
+Copy [_template/](_template/) when ready: `SKILL.md` + `checklist.md` (+ bilingual `README` if useful).
 
 ## How skills relate to the lab
 
 ```text
-prompts/     ──trigger──►  skills/
-skills/      ──combine──►  workflows/
+prompts/     ──trigger──►  skills/      (add when needed)
+skills/      ──combine──►  workflows/   (add when needed)
 cases/       ──record───►   real runs
-notes/       ──explain──►   theory behind skills
+notes/       ──explain──►   theory (e.g. reading openai/codex)
 ```

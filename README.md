@@ -8,18 +8,8 @@ A shared canvas for me and Codex — skills, workflows, cases, and notes from re
 
 ```text
 codex-labs/
-├── skills/
-│   ├── debugging/
-│   ├── code-review/
-│   ├── repo-understanding/
-│   ├── documentation/
-│   ├── architecture/
-│   └── testing/
-├── workflows/
-│   ├── new-project/
-│   ├── fix-bug/
-│   ├── implement-feature/
-│   └── release/
+├── skills/          # _template/ only — add skills from real cases
+├── workflows/       # _template/ only — add when skills chain
 ├── prompts/
 ├── cases/
 │   ├── _template/
@@ -47,31 +37,31 @@ notes / resources   ────────── theory & references
 
 ## Start here
 
+### Notes
+
 | Topic | English | 中文 |
 | ----- | ------- | ---- |
-| Skills index | [skills/README.md](skills/README.md) | [skills/README_zh.md](skills/README_zh.md) |
-| Workflows index | [workflows/README.md](workflows/README.md) | [workflows/README_zh.md](workflows/README_zh.md) |
 | Codex architecture | [notes/architecture.md](notes/architecture.md) | [notes/architecture_cn.md](notes/architecture_cn.md) |
-| Curated links | [resources/links.md](resources/links.md) | [resources/links_zh.md](resources/links_zh.md) |
-| Cases index | [cases/README.md](cases/README.md) | [cases/README_zh.md](cases/README_zh.md) |
-| Case template | [cases/_template/case.md](cases/_template/case.md) | [cases/_template/case_zh.md](cases/_template/case_zh.md) |
+| Layered design | [notes/layeredDesign.md](notes/layeredDesign.md) | [notes/layeredDesign_cn.md](notes/layeredDesign_cn.md) |
+| What AGENTS.md constrains | [notes/agents-md.md](notes/agents-md.md) | [notes/agents-md_cn.md](notes/agents-md_cn.md) |
 | Field research (3 voice interviews) | [notes/real-workflows.md](notes/real-workflows.md) | [notes/real-workflows_cn.md](notes/real-workflows_cn.md) |
 
-## Workflows at a glance
+### Cases
 
-| Workflow | Skills chain |
-| -------- | ------------ |
-| [new-project](workflows/new-project/) | repo-understanding → architecture → documentation → testing |
-| [fix-bug](workflows/fix-bug/) | debugging → testing → code-review |
-| [implement-feature](workflows/implement-feature/) | repo-understanding → architecture → implement → testing → code-review |
-| [release](workflows/release/) | testing → documentation → code-review |
+| Case | English | 中文 |
+| ---- | ------- | ---- |
+| 001 — Realtime AI Presenter demo | [cases/001-realtime-ai-presenter/case.md](cases/001-realtime-ai-presenter/case.md) | [cases/001-realtime-ai-presenter/case_zh.md](cases/001-realtime-ai-presenter/case_zh.md) |
+| 002 — Biotech SWE | [cases/002-biotech-swe/case.md](cases/002-biotech-swe/case.md) | [cases/002-biotech-swe/case_zh.md](cases/002-biotech-swe/case_zh.md) |
+| 003 — Fintech doc pipeline | [cases/003-fintech-doc-pipeline/case.md](cases/003-fintech-doc-pipeline/case.md) | [cases/003-fintech-doc-pipeline/case_zh.md](cases/003-fintech-doc-pipeline/case_zh.md) |
+| 004 — Big Tech infra | [cases/004-bigtech-infra/case.md](cases/004-bigtech-infra/case.md) | [cases/004-bigtech-infra/case_zh.md](cases/004-bigtech-infra/case_zh.md) |
+| Template | [cases/_template/case.md](cases/_template/case.md) | [cases/_template/case_zh.md](cases/_template/case_zh.md) |
 
 ## Working principles
 
-- Skills are atomic; workflows compose them; cases prove they work
-- Treat Codex as a collaborator — human gates stay in skill/workflow docs
-- Capture failures; they teach the best workflows
+- **Cases and notes first** — record what happened; use notes to understand repos like [openai/codex](https://github.com/openai/codex)
+- Add skills and workflows only when a pattern repeats across cases
+- Treat Codex as a collaborator — human gates belong in skill/workflow docs when you add them
 
 ## Status
 
-Just getting started. Add `SKILL.md` / prompt files as you use each path in anger.
+Cases and repo-reading notes are the focus. `skills/` and `workflows/` are placeholders (`_template/` only) until real patterns emerge.

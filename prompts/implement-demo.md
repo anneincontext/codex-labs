@@ -2,7 +2,6 @@
 
 **English** | [中文](implement-demo_zh.md)
 
-**Skill:** [implement-feature](../workflows/implement-feature/) + [repo-understanding](../skills/repo-understanding/)  
 **Case:** [cases/001-realtime-ai-presenter/case.md](../cases/001-realtime-ai-presenter/case.md)  
 **Resulting repo:** [realtime-ai-presenter](https://github.com/anneincontext/realtime-ai-presenter)
 
@@ -78,4 +77,4 @@ After the repo exists, [AGENTS.md](https://github.com/anneincontext/realtime-ai-
 - **~20 minutes:** this prompt once → first demoable version
 - **After:** continued conversation for usability polish (small prompts, small diffs) — no need to repeat the full spec
 
-Fits the bootstrap step of [implement-feature](../workflows/implement-feature/); polish uses short turns + `AGENTS.md`.
+Bootstrap once with this prompt; polish uses short turns + `AGENTS.md`.

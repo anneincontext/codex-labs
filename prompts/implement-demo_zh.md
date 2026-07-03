@@ -2,7 +2,6 @@
 
 [English](implement-demo.md) | **中文**
 
-**Workflow：** [implement-feature](../workflows/implement-feature/) + [repo-understanding](../skills/repo-understanding/)  
 **案例：** [cases/001-realtime-ai-presenter/case_zh.md](../cases/001-realtime-ai-presenter/case_zh.md)  
 **产出仓库：** [realtime-ai-presenter](https://github.com/anneincontext/realtime-ai-presenter)
 
@@ -78,4 +77,4 @@ Verification:
 - **~20 分钟**：本 prompt 一次 → 可演示的第一版
 - **之后**：持续对话打磨可用性（小 prompt、小改动），不必重写任务书
 
-适合 [implement-feature](../workflows/implement-feature/) workflow 的「启动」阶段，打磨阶段用短指令 + `AGENTS.md` 即可。
+本 prompt 用于一次性启动；打磨阶段用短指令 + `AGENTS.md` 即可。

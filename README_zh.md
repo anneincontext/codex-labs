@@ -8,18 +8,8 @@
 
 ```text
 codex-labs/
-├── skills/
-│   ├── debugging/
-│   ├── code-review/
-│   ├── repo-understanding/
-│   ├── documentation/
-│   ├── architecture/
-│   └── testing/
-├── workflows/
-│   ├── new-project/
-│   ├── fix-bug/
-│   ├── implement-feature/
-│   └── release/
+├── skills/          # 仅 _template/ — 从真实 case 沉淀后再加
+├── workflows/       # 仅 _template/ — skill 能串起来后再加
 ├── prompts/
 ├── cases/
 │   ├── _template/
@@ -47,31 +37,31 @@ notes / resources   ─────────── 原理与参考资料
 
 ## 从这里开始
 
+### Notes
+
 | 主题 | English | 中文 |
 | ---- | ------- | ---- |
-| Skills 索引 | [skills/README.md](skills/README.md) | [skills/README_zh.md](skills/README_zh.md) |
-| Workflows 索引 | [workflows/README.md](workflows/README.md) | [workflows/README_zh.md](workflows/README_zh.md) |
 | Codex 架构 | [notes/architecture.md](notes/architecture.md) | [notes/architecture_cn.md](notes/architecture_cn.md) |
-| 精选链接 | [resources/links.md](resources/links.md) | [resources/links_zh.md](resources/links_zh.md) |
-| 案例索引 | [cases/README.md](cases/README.md) | [cases/README_zh.md](cases/README_zh.md) |
-| 案例模板 | [cases/_template/case.md](cases/_template/case.md) | [cases/_template/case_zh.md](cases/_template/case_zh.md) |
+| 分层架构 | [notes/layeredDesign.md](notes/layeredDesign.md) | [notes/layeredDesign_cn.md](notes/layeredDesign_cn.md) |
+| AGENTS.md 约束什么 | [notes/agents-md.md](notes/agents-md.md) | [notes/agents-md_cn.md](notes/agents-md_cn.md) |
 | 田野调研（三次语音访谈） | [notes/real-workflows.md](notes/real-workflows.md) | [notes/real-workflows_cn.md](notes/real-workflows_cn.md) |
 
-## Workflow 一览
+### 案例
 
-| Workflow | 技能链 |
-| -------- | ------ |
-| [new-project](workflows/new-project/) | repo-understanding → architecture → documentation → testing |
-| [fix-bug](workflows/fix-bug/) | debugging → testing → code-review |
-| [implement-feature](workflows/implement-feature/) | repo-understanding → architecture → 实现 → testing → code-review |
-| [release](workflows/release/) | testing → documentation → code-review |
+| 案例 | English | 中文 |
+| ---- | ------- | ---- |
+| 001 — Realtime AI Presenter demo | [cases/001-realtime-ai-presenter/case.md](cases/001-realtime-ai-presenter/case.md) | [cases/001-realtime-ai-presenter/case_zh.md](cases/001-realtime-ai-presenter/case_zh.md) |
+| 002 — 生物科技 SWE | [cases/002-biotech-swe/case.md](cases/002-biotech-swe/case.md) | [cases/002-biotech-swe/case_zh.md](cases/002-biotech-swe/case_zh.md) |
+| 003 — 金融科技文档流水线 | [cases/003-fintech-doc-pipeline/case.md](cases/003-fintech-doc-pipeline/case.md) | [cases/003-fintech-doc-pipeline/case_zh.md](cases/003-fintech-doc-pipeline/case_zh.md) |
+| 004 — 大厂 infra | [cases/004-bigtech-infra/case.md](cases/004-bigtech-infra/case.md) | [cases/004-bigtech-infra/case_zh.md](cases/004-bigtech-infra/case_zh.md) |
+| 模板 | [cases/_template/case.md](cases/_template/case.md) | [cases/_template/case_zh.md](cases/_template/case_zh.md) |
 
 ## 工作原则
 
-- Skill 要原子化；Workflow 组合 skill；Case 验证是否真的好用
-- Codex 是协作者——人工关卡写在 skill/workflow 里
-- 失败也要记录；最能教会你 workflow
+- **先 case 和 notes** — 记录真实发生的事；用 notes 读懂 [openai/codex](https://github.com/openai/codex) 等仓库
+- 模式在多个 case 里重复出现，再往 `skills/`、`workflows/` 里加
+- Codex 是协作者——人工关卡等有了 skill/workflow 再写进去
 
 ## 状态
 
-刚刚起步。每走通一条路径，就补对应的 `SKILL.md` 和 prompt 文件。
+当前重点是 case 和读 repo 的 notes。`skills/`、`workflows/` 仅占位（只有 `_template/`），等真实模式浮现再加。

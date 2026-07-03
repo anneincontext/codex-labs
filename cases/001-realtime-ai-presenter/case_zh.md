@@ -7,7 +7,6 @@
 
 ## Skills / Workflow / Prompts
 
-- **Workflow：** [implement-feature](../../workflows/implement-feature/)
 - **Prompt：** [prompts/implement-demo_zh.md](../../prompts/implement-demo_zh.md)
 - **持久规则：** [AGENTS.md](https://github.com/anneincontext/realtime-ai-presenter/blob/main/AGENTS.md)
 - **仓库：** [anneincontext/realtime-ai-presenter](https://github.com/anneincontext/realtime-ai-presenter)
