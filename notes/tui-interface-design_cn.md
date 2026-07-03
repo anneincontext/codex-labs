@@ -10,7 +10,7 @@
 
 ## 一句话
 
-**事件驱动 UI**，底层 **ratatui + crossterm**，通过 **`app-server` JSON-RPC** 和 agent 通信（不在 widget 里嵌入 `codex-core` 会话逻辑）。三路输入在 `App` 汇合；可见内容靠 **`Renderable`** + **`HistoryCell`** 拼出来；底部临时 UI 用 **`BottomPaneView`**。
+**事件驱动 UI**，底层 **ratatui + crossterm**，通过 **`app-server` JSON-RPC** 和 agent 通信（不在 widget 里嵌入 `codex-core` 会话逻辑）。四路输入在 `App` 汇合；可见内容靠 **`Renderable`** + **`HistoryCell`** 拼出来；底部临时 UI 用 **`BottomPaneView`**。渲染分**两个表面**：已完成的行流进终端自己的 scrollback，在途内容在一个 **inline 视口**（不是全屏 alt-screen）里每帧 diff 重绘。
 
 ---
 
@@ -92,7 +92,7 @@ flowchart TD
 
 | 通道 | 枚举 | 含义 |
 | ---- | ---- | ---- |
-| UI 协调 | `AppEvent`（`app_event.rs`） | 「App 层请做 X」— picker、配置、导航、退出模式 |
+| UI 协调 | `AppEvent`（`app_event.rs`，约 180 个变体的大总线） | 「App 层请做 X」— picker、配置、导航、退出模式 |
 | Agent 操作 | `AppCommand`（`app_command.rs`） | 「发给会话」— `UserTurn`、`Interrupt`、审批、`Compact`、rollback |
 
 `AppEventSender`（`app_event_sender.rs`）包装 channel，可在各 callsite 提交类型化的 `AppCommand`，避免重复拼装。
@@ -121,13 +121,15 @@ TUI 默认走 **进程内** app-server（`AppServerClient`），语义与 IDE/SD
 
 ```rust
 pub trait Renderable {
-    fn render(&self, area: Rect, buf: &mut Buffer);
-    fn desired_height(&self, width: u16) -> u16;
-    fn cursor_pos(&self, area: Rect) -> Option<(u16, u16)>;
-    fn cursor_style(&self, area: Rect) -> SetCursorStyle;
+    fn render(&self, area: Rect, buf: &mut Buffer);   // 必需
+    fn desired_height(&self, width: u16) -> u16;      // 必需
+    // 有默认实现（只有自己管光标的 widget 才覆盖）：
+    fn cursor_pos(&self, area: Rect) -> Option<(u16, u16)> { None }
+    fn cursor_style(&self, area: Rect) -> SetCursorStyle { SetCursorStyle::DefaultUserShape }
 }
 ```
 
+- **只有 `render` + `desired_height` 是必需的**；两个 cursor 方法有默认实现。
 - **先量后画：** `App::render_chat_widget_frame` 先算高度再绘制。
 - **`FlexRenderable`：** 主聊天列纵向 flex（`chatwidget/rendering.rs`）。
 - **`RenderableItem`：** owned / borrowed trait object 组合。
@@ -142,7 +144,8 @@ pub trait Renderable {
 
 | 方法 | 用途 |
 | ---- | ---- |
-| `display_lines(width)` | 主 inline 视口 |
+| `display_lines(width)` | 主 inline 视口（富样式） |
+| `raw_lines()` + `HistoryRenderMode::{Rich, Raw}` | raw 输出模式下的纯文本 scrollback |
 | `transcript_lines(width)` | 全量 transcript overlay（`Ctrl+T`）；可与主视口不同（如 exec 带 `$` 前缀） |
 | `desired_height(width)` | ratatui 换行后的真实行数（URL 可能比逻辑行更宽） |
 
@@ -240,6 +243,26 @@ flowchart LR
   reflow --> render["chat_widget.render"]
   render --> cursor["从 composer 设光标"]
 ```
+
+---
+
+## 渲染模型：两个表面
+
+TUI **不整屏重绘**，而是把输出拆成两个独立管理的表面，每帧在一次 `stdout().sync_update` 里原子地合起来（`tui.rs`，`Tui::draw` / `draw_with_resize_reflow`）。
+
+| | 表面 A — scrollback | 表面 B — inline 视口 |
+| --- | ------------------- | -------------------- |
+| **文件** | `insert_history.rs` | `custom_terminal.rs`（ratatui `Terminal` 的裁剪 fork） |
+| **装什么** | 已完成的历史行 | 唯一在途的 `active_cell` 区 + `BottomPane` |
+| **归谁** | 终端模拟器 | Codex |
+| **写法** | 写一次：在视口**上方**设 scroll region（`SetScrollRegion`），发样式行，旧行上滚进原生 scrollback | 双 buffer，**只按视口大小**分配；每帧全量渲染后用 `diff_buffers` 只发变化的 cell |
+| **有 back-buffer 吗** | 没有 — 滚动和选中都归终端 | 有（previous vs current buffer） |
+
+**为什么要自定义终端：** 原版 ratatui 假设自己独占整屏。这个 fork 把 diff 限制在底部视口，因此永远不会覆盖上方的 scrollback 行。
+
+**每帧顺序：** ① 调整/滚动视口区域 → ② `flush_pending_history_lines`（`insert_history` 把已提交内容写进 scrollback）→ ③ `terminal.draw`（diff 重绘在途视口）。
+
+> **净效果：** 已完成内容写一次流进终端 scrollback（终端负责滚动）；在途内容在固定高度的底部视口里持续 diff 重绘。这就是为什么历史留在正常 scrollback 里，而 alt-screen 只留给临时浮层（pager、picker）。
 
 ---
 

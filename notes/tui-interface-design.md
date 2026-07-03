@@ -10,7 +10,7 @@ How the [`codex-tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) cr
 
 ## One-line summary
 
-**Event-driven UI** over **ratatui + crossterm**, talking to the agent through **`app-server` JSON-RPC** (not by embedding `codex-core` session logic in widgets). Three parallel inputs converge in `App`; visible output is built from **`Renderable`** + **`HistoryCell`**; transient footer UI uses **`BottomPaneView`**.
+**Event-driven UI** over **ratatui + crossterm**, talking to the agent through **`app-server` JSON-RPC** (not by embedding `codex-core` session logic in widgets). Four parallel inputs converge in `App`; visible output is built from **`Renderable`** + **`HistoryCell`**; transient footer UI uses **`BottomPaneView`**. It renders as **two surfaces**: finished lines stream into the terminal's own scrollback, while an **inline viewport** (not a full alt-screen) is diff-redrawn each frame.
 
 ---
 
@@ -92,7 +92,7 @@ On `Draw` / `Resize`, `App::handle_tui_event` runs `pre_draw_tick`, measures `Ch
 
 | Channel | Enum | Meaning |
 | ------- | ---- | ------- |
-| UI coordination | `AppEvent` (`app_event.rs`) | "App layer, please do X" — pickers, config, navigation, shutdown mode |
+| UI coordination | `AppEvent` (`app_event.rs`, a broad ~180-variant bus) | "App layer, please do X" — pickers, config, navigation, shutdown mode |
 | Agent operations | `AppCommand` (`app_command.rs`) | "Send this to the session" — `UserTurn`, `Interrupt`, approvals, `Compact`, rollback |
 
 `AppEventSender` (`app_event_sender.rs`) wraps the channel and can submit typed `AppCommand`s without duplicating construction at every callsite.
@@ -121,13 +121,15 @@ TUI default path uses an **in-process** app-server (`AppServerClient`), so seman
 
 ```rust
 pub trait Renderable {
-    fn render(&self, area: Rect, buf: &mut Buffer);
-    fn desired_height(&self, width: u16) -> u16;
-    fn cursor_pos(&self, area: Rect) -> Option<(u16, u16)>;
-    fn cursor_style(&self, area: Rect) -> SetCursorStyle;
+    fn render(&self, area: Rect, buf: &mut Buffer);   // required
+    fn desired_height(&self, width: u16) -> u16;      // required
+    // defaulted (override only when the widget owns the cursor):
+    fn cursor_pos(&self, area: Rect) -> Option<(u16, u16)> { None }
+    fn cursor_style(&self, area: Rect) -> SetCursorStyle { SetCursorStyle::DefaultUserShape }
 }
 ```
 
+- **Only `render` + `desired_height` are required**; the two cursor methods are defaulted.
 - **Measure then draw:** `App::render_chat_widget_frame` asks height first, then paints.
 - **`FlexRenderable`:** vertical flex stack for the main chat column (`chatwidget/rendering.rs`).
 - **`RenderableItem`:** owned or borrowed trait object for composition.
@@ -142,7 +144,8 @@ Implementors include `ChatWidget`, `BottomPane`, history cells, and every `Botto
 
 | Method | Purpose |
 | ------ | ------- |
-| `display_lines(width)` | Main inline viewport |
+| `display_lines(width)` | Main inline viewport (rich) |
+| `raw_lines()` + `HistoryRenderMode::{Rich, Raw}` | Plain lines for raw-output scrollback mode |
 | `transcript_lines(width)` | Full transcript overlay (`Ctrl+T`); may differ (e.g. exec shows `$` prefix) |
 | `desired_height(width)` | Row count after ratatui wrap (URLs can wrap wider than logical line count) |
 
@@ -240,6 +243,26 @@ flowchart LR
   reflow --> render["chat_widget.render"]
   render --> cursor["set cursor from composer"]
 ```
+
+---
+
+## Rendering model: two surfaces
+
+The TUI does **not** repaint the whole screen. It splits output into two independently managed surfaces, joined atomically inside one `stdout().sync_update` per frame (`tui.rs`, `Tui::draw` / `draw_with_resize_reflow`).
+
+| | Surface A — scrollback | Surface B — inline viewport |
+| --- | ---------------------- | --------------------------- |
+| **File** | `insert_history.rs` | `custom_terminal.rs` (ratatui `Terminal` fork) |
+| **Holds** | Finished history lines | The single in-flight (`active_cell`) region + `BottomPane` |
+| **Owner** | The terminal emulator | Codex |
+| **Write model** | Write-once: sets a scroll region *above* the viewport (`SetScrollRegion`), emits styled lines, older rows scroll up into native scrollback | Double buffers sized **only to the viewport**; each frame full-renders, then `diff_buffers` emits just the changed cells |
+| **Back-buffer?** | None — the terminal owns scrolling & selection | Yes (previous vs current buffer) |
+
+**Why a custom terminal:** stock ratatui assumes it owns the whole screen. This fork constrains its diff to the bottom viewport, so it never overwrites the scrollback rows above it.
+
+**Per frame, in order:** ① adjust/scroll the viewport area → ② `flush_pending_history_lines` (`insert_history` writes committed content to scrollback) → ③ `terminal.draw` (diff-render the in-progress viewport).
+
+> **Net:** finished content streams once into terminal scrollback (the terminal scrolls it); in-progress content is continuously diff-redrawn in a fixed-height bottom viewport. This is why history stays in normal scrollback and the alt-screen is reserved for transient overlays (pager, pickers).
 
 ---
 
