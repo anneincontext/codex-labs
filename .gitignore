@@ -6,6 +6,7 @@
 .idea/
 *.swp
 *.swo
+.obsidian/
 
 # Environment files
 .env
