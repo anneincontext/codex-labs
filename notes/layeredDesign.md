@@ -2,7 +2,7 @@
 
 **English** | [中文](layeredDesign_cn.md)
 
-A layer-by-layer walkthrough of the Codex repository, based on the **Layered design** section in [architecture.md](architecture.md).
+A layer-by-layer walkthrough of the Codex repository. For the crate-by-crate map and request flow, see [architecture.md](architecture.md).
 
 ---
 
@@ -115,16 +115,18 @@ Core assembles `instructions`, `input`, and `tools`, then hands off to this laye
 
 ---
 
-## ⑤ Execution — `exec-server`
+## ⑤ Execution — core exec path + `exec-server`
 
-**Role:** Where processes **actually run on the machine** — shells, PTYs, subprocess lifecycle.
+**Role:** Where processes **actually run on the machine** — shells, subprocess lifecycle, stdin/stdout.
 
-- Local: `codex exec-server` over WebSocket JSON-RPC
+By default this happens **inside `codex-core`**: `core/src/exec.rs` (`process_exec_tool_call` → `spawn_child_async`) spawns the process directly, wrapped by sandboxing (⑥). Core decides "run `cargo test`"; the core exec path spawns it and streams the output back.
+
+[`exec-server`](https://github.com/openai/codex/tree/main/codex-rs/exec-server) is an **experimental** extraction of that execution into a standalone service, for two scenarios:
+
+- Local: `codex exec-server` (marked `[EXPERIMENTAL]`) over WebSocket JSON-RPC
 - Remote: registers with an environment registry and controls processes across machines via **Noise-encrypted relay** (app-server and exec-server can run on different OSes)
 
-Core decides "run `cargo test`"; **exec-server** spawns the process, handles stdin/stdout, and manages background terminals.
-
-**Why this layer matters:** Dangerous operations (spawning processes) are pulled out of core for local/remote deployment and independent hardening.
+**Why this layer matters:** Process spawning is a distinct concern with its own sandbox wrapping — and factoring it into `exec-server` lets the same execution run locally or across machines, hardened independently.
 
 ---
 
@@ -135,10 +137,10 @@ Core decides "run `cargo test`"; **exec-server** spawns the process, handles std
 | Platform | Mechanism |
 |----------|-----------|
 | macOS | Seatbelt (`sandbox-exec`) |
-| Linux | bubblewrap (`bwrap`), with Landlock fallback in some cases |
+| Linux | bubblewrap (`bwrap`) + Landlock/seccomp |
 | Windows | Restricted-token sandbox |
 
-Policies come from `SandboxPolicy` / permissions config (read-only, workspace-write, network rules, etc.). Before exec-server starts a command, sandboxing wraps it according to policy.
+Policies come from `SandboxPolicy` / permissions config (read-only, workspace-write, network rules, etc.). Before the core exec path starts a command, sandboxing wraps it according to policy.
 
 **Why this layer matters:** No matter how capable the model is, there is still **platform-level isolation** plus **user approvals** before touching disk or network.
 
@@ -185,7 +187,7 @@ Typical flow:
 initialize → thread/start → turn/start → receive item/* notifications → turn/completed
 ```
 
-`app-server-protocol` defines v2 API types and can generate TypeScript schemas so IDEs stay aligned with CLI versions.
+`app-server-protocol` defines v1/v2 API types and can generate TypeScript schemas so IDEs stay aligned with CLI versions.
 
 **Why this layer matters:** Core is wrapped as a **stable, versioned RPC surface** so editors and SDKs do not need to embed the Rust TUI.
 
@@ -209,7 +211,7 @@ Example: "Fix this test" from VS Code:
       │  calls codex-api (④) → OpenAI
       │  model requests a test run → ToolRouter
       ▼
-5. exec-server (⑤)  spawns shell
+5. core exec path (⑤)  spawns shell (core/src/exec.rs)
       │  wrapped by sandboxing (⑥)
       ▼
 6. results return to core → fed back to model → Event stream
@@ -227,7 +229,7 @@ Example: "Fix this test" from VS Code:
 | Protocol | Shared `Op` / `Event` / config types |
 | Core | Agent main loop: context, model, tools, persistence |
 | API client | Talks to the OpenAI Responses API |
-| Execution | Actually runs subprocesses locally or remotely |
+| Execution | Runs subprocesses — in core by default; `exec-server` (experimental) for local/remote |
 | Sandboxing | Restricts filesystem and network access |
 | Extensions | Pluggable skills, MCP, memory, and more |
 | IDE integration | JSON-RPC facade for editors and SDKs |
