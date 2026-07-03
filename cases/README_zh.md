@@ -14,5 +14,6 @@
 | [002-biotech-swe](002-biotech-swe/case_zh.md) | 语音访谈 | JIRA → Cursor、全局 AGENTS.md |
 | [003-fintech-doc-pipeline](003-fintech-doc-pipeline/case_zh.md) | 语音访谈 | Codex + 钉钉文档 A/B 流水线 |
 | [004-bigtech-infra](004-bigtech-infra/case_zh.md) | 语音访谈 | 领域 harness、成熟度阶梯 |
+| [005-learn-codex-repo](005-learn-codex-repo/case_zh.md) | Anne 自己学习 | AI 读仓库总览 → architecture notes |
 
-注明用了哪些 **skills**、**prompts**、**workflows**。
+注明用了哪些 **prompts** 和 **notes**。

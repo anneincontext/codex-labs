@@ -4,6 +4,7 @@
 
 [openai/codex](https://github.com/openai/codex) 仓库的高层概览——项目做什么、如何组织、请求如何流转、用了哪些技术。
 
+> 这份笔记怎么来的：[案例 005 — 用 AI 学习 openai/codex](../cases/005-learn-codex-repo/case_zh.md) · prompt：[learn-repo-overview_zh.md](../prompts/learn-repo-overview_zh.md)  
 > 逐层详解见 [layeredDesign_cn.md](layeredDesign_cn.md)（中文）或 [layeredDesign.md](layeredDesign.md)（English）。
 
 ---

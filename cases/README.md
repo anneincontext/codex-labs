@@ -14,5 +14,6 @@ Template: [_template/](_template/) — copy the folder and rename.
 | [002-biotech-swe](002-biotech-swe/case.md) | Voice interview | JIRA → Cursor, global AGENTS.md |
 | [003-fintech-doc-pipeline](003-fintech-doc-pipeline/case.md) | Voice interview | Codex + DingTalk doc A/B pipeline |
 | [004-bigtech-infra](004-bigtech-infra/case.md) | Voice interview | Domain harness, maturity ladder |
+| [005-learn-codex-repo](005-learn-codex-repo/case.md) | Anne's own learning | AI repo overview → architecture notes |
 
-Reference which **skills**, **prompts**, and **workflows** you used.
+Reference which **prompts** and **notes** you used.

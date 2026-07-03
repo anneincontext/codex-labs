@@ -50,6 +50,7 @@ notes / resources   ────────── theory & references
 
 | Case | English | 中文 |
 | ---- | ------- | ---- |
+| 005 — Learn openai/codex | [cases/005-learn-codex-repo/case.md](cases/005-learn-codex-repo/case.md) | [cases/005-learn-codex-repo/case_zh.md](cases/005-learn-codex-repo/case_zh.md) |
 | 001 — Realtime AI Presenter demo | [cases/001-realtime-ai-presenter/case.md](cases/001-realtime-ai-presenter/case.md) | [cases/001-realtime-ai-presenter/case_zh.md](cases/001-realtime-ai-presenter/case_zh.md) |
 | 002 — Biotech SWE | [cases/002-biotech-swe/case.md](cases/002-biotech-swe/case.md) | [cases/002-biotech-swe/case_zh.md](cases/002-biotech-swe/case_zh.md) |
 | 003 — Fintech doc pipeline | [cases/003-fintech-doc-pipeline/case.md](cases/003-fintech-doc-pipeline/case.md) | [cases/003-fintech-doc-pipeline/case_zh.md](cases/003-fintech-doc-pipeline/case_zh.md) |
