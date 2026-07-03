@@ -25,42 +25,54 @@ The shipped binary is `codex`; the npm package `@openai/codex` is a thin wrapper
 
 A **Rust-first monorepo** ([`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs), ~130 crates) plus Node/TypeScript packaging and SDKs. Clients sit on top, capability providers (model API, execution, MCP, sandbox) below, and one `codex-core` orchestrates the middle.
 
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           Clients / Entry Points                            │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ codex-cli (binary)                                                          │
-│      │                                                                      │
-│      ├─► codex-tui           interactive terminal UI                        │
-│      ├─► codex app-server    JSON-RPC (IDE, desktop, Python SDK)            │
-│      └─► codex exec          headless / CI mode                             │
-│                                                                             │
-│ TypeScript SDK ──► codex exec JSONL    Python SDK ──► app-server stdio      │
-└──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │
-                                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                                 Agent Core                                  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ codex-core                                                                  │
-│      │                                                                      │
-│      ├─ codex-protocol       shared Op / Event / config types               │
-│      ├─ codex-tools          tool specs, routing, execution                 │
-│      └─ thread-store         rollout JSONL + SQLite metadata                │
-│                                                                             │
-│ Codex = queue pair:  submit(Op) ──► session loop ──► receive(Event)         │
-└───────────┬─────────────────┬─────────────────┬─────────────────┬───────────┘
-            │                 │                 │                 │
-            ▼                 ▼                 ▼                 ▼
-    ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐
-    │   codex-api   │ │  exec-server  │ │   codex-mcp   │ │  sandboxing   │
-    │    OpenAI     │ │  subprocess   │ │   MCP tool    │ │macOS Seatbelt │
-    │   Responses   │ │     / PTY     │ │    servers    │ │  Linux bwrap  │
-    │ SSE/WebSocket │ │ local/remote  │ │               │ │  Win restr.   │
-    └───────────────┘ └───────────────┘ └───────────────┘ └───────────────┘
+```mermaid
+flowchart TB
+    subgraph clients["Clients / Entry Points"]
+        cli["codex-cli<br/>(binary)"]
+        tui["codex-tui<br/>interactive terminal UI"]
+        appServer["codex app-server<br/>JSON-RPC: IDE / desktop / Python SDK"]
+        execMode["codex exec<br/>headless / CI mode"]
+        tsSdk["TypeScript SDK"]
+        pySdk["Python SDK"]
+
+        cli --> tui
+        cli --> appServer
+        cli --> execMode
+        tsSdk -->|"JSONL"| execMode
+        pySdk -->|"stdio"| appServer
+    end
+
+    subgraph agentCore["Agent Core"]
+        core["codex-core<br/>session / turn orchestration"]
+        protocol["codex-protocol<br/>shared Op / Event / config types"]
+        tools["codex-tools<br/>tool specs, routing, execution"]
+        store["thread-store<br/>rollout JSONL + SQLite metadata"]
+        queue["Codex queue pair<br/>submit(Op) -> session loop -> receive(Event)"]
+
+        core --- protocol
+        core --- tools
+        core --- store
+        core --- queue
+    end
+
+    tui --> core
+    appServer --> core
+    execMode --> core
+
+    subgraph capabilities["Capability Providers"]
+        api["codex-api<br/>OpenAI Responses<br/>SSE / WebSocket"]
+        execServer["exec-server<br/>subprocess / PTY<br/>local / remote"]
+        mcp["codex-mcp<br/>MCP tool servers"]
+        sandbox["sandboxing<br/>macOS Seatbelt<br/>Linux bwrap<br/>Windows restricted"]
+    end
+
+    core --> api
+    core --> execServer
+    core --> mcp
+    core --> sandbox
 ```
 
-> The diagram uses a fixed 79-column layout so boxes and connectors align in monospace viewers.
+> Crate names are kept in English; Mermaid renders interactively on GitHub.
 
 At the center, `codex-core` exposes `Codex` as a **queue pair**: callers submit `Op`s and receive `Event`s. This one abstraction backs every surface.
 
@@ -172,15 +184,23 @@ Every surface runs the **same core loop** — one turn:
 
 app-server message exchange:
 
-```text
-Client                    app-server                  codex-core
-  │── initialize ──────────►│                           │
-  │◄── initialized ─────────│                           │
-  │── thread/start ────────►│── spawn Codex session ───►│
-  │── turn/start ──────────►│── Op::UserInput ─────────►│
-  │◄── item/started ────────│◄── Event stream ──────────│
-  │◄── item/agentMessage/delta                          │
-  │◄── turn/completed ──────│◄── turn done ─────────────│
+```mermaid
+sequenceDiagram
+    participant Client
+    participant AS as app-server
+    participant Core as codex-core
+
+    Client->>AS: initialize
+    AS-->>Client: initialized
+    Client->>AS: thread/start
+    AS->>Core: spawn Codex session
+    Client->>AS: turn/start
+    AS->>Core: Op::UserInput
+    Core-->>AS: Event stream
+    AS-->>Client: item/started
+    AS-->>Client: item/agentMessage/delta
+    Core-->>AS: turn done
+    AS-->>Client: turn/completed
 ```
 
 ### Sandboxing in the execution path
