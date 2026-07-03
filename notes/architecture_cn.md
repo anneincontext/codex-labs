@@ -11,27 +11,15 @@
 
 ## 项目做什么
 
-**Codex CLI** 是 OpenAI 的本地编程代理。它运行在你的机器上，可以：
+**Codex CLI** 是 OpenAI 的本地编程代理。给它一个自然语言任务（「修这个测试」「重构这个模块」），它就用 LLM 加内置工具来规划和执行——读写文件、跑 shell 命令、搜索网页、调用 MCP 工具——全程都在可配置的**沙箱和审批**策略下进行。对话历史持久化为 **thread（会话）** 和 **turn（轮次）**。
 
-- 接受自然语言任务（「修这个测试」「重构这个模块」等）
-- 用 LLM 推理 + 内置工具来规划和执行工作
-- 读写文件、跑 shell 命令、搜索网页、调用 MCP 工具
-- 在可配置的沙箱和审批策略下运行
-- 把对话历史持久化为 **thread（会话）** 和 **turn（轮次）**
-
-发布的二进制叫 `codex`。npm 包 `@openai/codex` 只是调用该原生二进制的薄包装。
-
-相关产品（不都在本仓库里）：
-
-- **Codex in IDE** — 通过 app-server 协议接入 VS Code、Cursor、Windsurf
-- **Codex App** — 桌面体验（`codex app`）
-- **Codex Web** — 云端代理，见 chatgpt.com/codex
+发布的二进制叫 `codex`；npm 包 `@openai/codex` 只是调用原生二进制的薄包装。同一套 core 也驱动 **Codex in IDE**（VS Code、Cursor、Windsurf——经 app-server）、**Codex App** 桌面体验（`codex app`），以及云端代理 **Codex Web**（chatgpt.com/codex）。
 
 ---
 
 ## 整体架构
 
-仓库是一个 **Rust 优先的 monorepo**（[`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs)），约 100 个 crate，外加 Node/TypeScript 打包和 SDK。
+一个 **Rust 优先的 monorepo**（[`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs)，约 130 个 crate），外加 Node/TypeScript 打包和 SDK。客户端在上，能力提供方（模型 API、执行、MCP、沙箱）在下，中间由一个 `codex-core` 编排。
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -65,73 +53,84 @@
     │    OpenAI     │ │  subprocess   │ │   MCP tool    │ │macOS Seatbelt │
     │   Responses   │ │     / PTY     │ │    servers    │ │  Linux bwrap  │
     │   API (SSE)   │ │ local/remote  │ │               │ │  Win restr.   │
-    │               │ │               │ │               │ │               │
-    │               │ │               │ │               │ │               │
-    │               │ │               │ │               │ │               │
     └───────────────┘ └───────────────┘ └───────────────┘ └───────────────┘
 ```
 
-> **说明：** 图中 crate 名与英文标签保留英文，以便在等宽字体下对齐。中文标题仅用于分区标识。
+> 图中采用固定 79 列布局，让方框和连线在等宽字体下对齐；crate 名保留英文。
 
-### 分层设计
-
-| 层 | Crate | 职责 |
-| ---- | ----- | ---- |
-| **入口** | [`codex-cli`](https://github.com/openai/codex/tree/main/codex-rs/cli) | `codex` 二进制路由到 TUI、`app-server`、`exec`、MCP、插件等 |
-| **协议** | [`codex-protocol`](https://github.com/openai/codex/tree/main/codex-rs/protocol) | 共享的 op、event、配置、thread/turn item 类型 |
-| **核心** | [`codex-core`](https://github.com/openai/codex/tree/main/codex-rs/core) | 代理循环、会话管理、上下文构建、工具编排 |
-| **API 客户端** | [`codex-api`](https://github.com/openai/codex/tree/main/codex-rs/codex-api)、[`codex-client`](https://github.com/openai/codex/tree/main/codex-rs/codex-client) | 与 OpenAI Responses API 通信（SSE 流式） |
-| **执行** | [`exec-server`](https://github.com/openai/codex/tree/main/codex-rs/exec-server) | 拉起和控制子进程；可本地或远程 |
-| **沙箱** | [`sandboxing`](https://github.com/openai/codex/tree/main/codex-rs/sandboxing)、[`linux-sandbox`](https://github.com/openai/codex/tree/main/codex-rs/linux-sandbox)、[`windows-sandbox-rs`](https://github.com/openai/codex/tree/main/codex-rs/windows-sandbox-rs) | 平台相关的隔离机制 |
-| **扩展** | [`ext/*`](https://github.com/openai/codex/tree/main/codex-rs/ext) | Skills、MCP、connectors、memories、网页搜索、goal 等 |
-| **IDE 集成** | [`app-server`](https://github.com/openai/codex/tree/main/codex-rs/app-server)、[`app-server-protocol`](https://github.com/openai/codex/tree/main/codex-rs/app-server-protocol) | 面向 VS Code 扩展等富客户端的 JSON-RPC API |
-
-[`codex-core`](https://github.com/openai/codex/tree/main/codex-rs/core) 是中心编排器，但仓库有意控制其体积；新功能倾向于落在独立 crate（[`codex-tools`](https://github.com/openai/codex/tree/main/codex-rs/tools)、[`ext/*`](https://github.com/openai/codex/tree/main/codex-rs/ext) 等）。
-
-### 核心抽象：队列对
-
-`codex-core` 把 `Codex` 暴露为高层句柄，以 **队列对** 运作：调用方发送 `Op`，接收 `Event` 流。
+核心处，`codex-core` 把 `Codex` 暴露为一个 **队列对**：调用方发送 `Op`，接收 `Event` 流。这一个抽象支撑了所有接入面。
 
 ```rust
 pub struct Codex {
-    pub(crate) tx_sub: Sender<Submission>,
-    pub(crate) rx_event: Receiver<Event>,
-    pub(crate) agent_status: watch::Receiver<AgentStatus>,
-    pub(crate) session: Arc<Session>,
+    tx_sub: Sender<Submission>,  // 入站：UserInput、ExecApproval、PatchApproval、Interrupt……
+    rx_event: Receiver<Event>,   // 出站：消息增量、工具进度、审批请求、turn 完成……
     // ...
 }
 ```
 
-主要入站操作（`Op`）：`UserInput`、`ExecApproval`、`PatchApproval`、`Interrupt`、`ThreadSettings` 等。
-
-主要出站消息（`Event` / `EventMsg`）：代理消息增量、工具进度、审批请求、turn 完成、错误等。
+`codex-core` 是中心编排器，但仓库有意控制它的体积——新功能倾向于落在独立 crate（[`codex-tools`](https://github.com/openai/codex/tree/main/codex-rs/tools)、[`ext/*`](https://github.com/openai/codex/tree/main/codex-rs/ext) 等）。下一节就是这些 crate 的地图。
 
 ---
 
 ## 重要目录
 
+### 顶层布局
+
 | 路径 | 用途 |
 | ---- | ---- |
-| [`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs) | 主 Rust workspace，几乎所有实现都在这里 |
-| [`codex-rs/core/`](https://github.com/openai/codex/tree/main/codex-rs/core) | 代理业务逻辑：会话、turn、工具、上下文、审批 |
-| [`codex-rs/cli/`](https://github.com/openai/codex/tree/main/codex-rs/cli) | `codex` 二进制入口和子命令路由 |
-| [`codex-rs/tui/`](https://github.com/openai/codex/tree/main/codex-rs/tui) | 终端 UI（ratatui） |
-| [`codex-rs/app-server/`](https://github.com/openai/codex/tree/main/codex-rs/app-server) | 面向 IDE/桌面的 JSON-RPC 服务 |
-| [`codex-rs/app-server-protocol/`](https://github.com/openai/codex/tree/main/codex-rs/app-server-protocol) | v1/v2 API 类型（Rust + 生成的 TypeScript schema） |
-| [`codex-rs/protocol/`](https://github.com/openai/codex/tree/main/codex-rs/protocol) | core、TUI、app-server 共享的内部协议类型 |
-| [`codex-rs/codex-api/`](https://github.com/openai/codex/tree/main/codex-rs/codex-api) | OpenAI Responses API 客户端和 SSE 解析 |
-| [`codex-rs/exec-server/`](https://github.com/openai/codex/tree/main/codex-rs/exec-server) | 本地/远程进程执行服务 |
-| [`codex-rs/sandboxing/`](https://github.com/openai/codex/tree/main/codex-rs/sandboxing) | 跨平台沙箱策略与强制执行 |
-| [`codex-rs/tools/`](https://github.com/openai/codex/tree/main/codex-rs/tools) | 工具规格、适配器和共享执行契约 |
-| [`codex-rs/ext/`](https://github.com/openai/codex/tree/main/codex-rs/ext) | 可选扩展：skills、MCP、connectors、memories、web-search 等 |
-| [`codex-rs/config/`](https://github.com/openai/codex/tree/main/codex-rs/config) | `config.toml` 加载和 schema |
-| [`codex-rs/thread-store/`](https://github.com/openai/codex/tree/main/codex-rs/thread-store) | thread/turn 持久化（SQLite） |
-| [`codex-rs/rollout/`](https://github.com/openai/codex/tree/main/codex-rs/rollout) | 会话 rollout 追踪，用于调试/回放 |
-| [`codex-cli/`](https://github.com/openai/codex/tree/main/codex-cli) | npm 包（`@openai/codex`）—— 分发包装 |
-| [`sdk/`](https://github.com/openai/codex/tree/main/sdk) | 嵌入 Codex 用的 TypeScript 和 Python SDK |
-| [`docs/`](https://github.com/openai/codex/tree/main/docs) | 贡献者文档（安装、配置、沙箱、贡献指南） |
-| [`scripts/`](https://github.com/openai/codex/tree/main/scripts)、[`bazel/`](https://github.com/openai/codex/tree/main/bazel)、[`justfile`](https://github.com/openai/codex/blob/main/justfile) | 构建、测试和开发自动化 |
+| [`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs) | Rust workspace（约 130 个 crate）——真正的产品，几乎所有实现都在这里 |
+| [`codex-cli/`](https://github.com/openai/codex/tree/main/codex-cli) | 薄 npm 包（`@openai/codex`）；[`bin/codex.js`](https://github.com/openai/codex/blob/main/codex-cli/bin/codex.js) 只是 exec 平台原生 Rust 二进制 |
+| [`sdk/`](https://github.com/openai/codex/tree/main/sdk) | 面向嵌入的 **TypeScript** 和 **Python** SDK |
+| [`docs/`](https://github.com/openai/codex/tree/main/docs) | 用户/贡献者文档（多为指向 developers.openai.com 的占位） |
+| [`scripts/`](https://github.com/openai/codex/tree/main/scripts)、[`tools/`](https://github.com/openai/codex/tree/main/tools)、[`bazel/`](https://github.com/openai/codex/tree/main/bazel)、[`patches/`](https://github.com/openai/codex/tree/main/patches)、[`justfile`](https://github.com/openai/codex/blob/main/justfile) | 构建、发布和开发工具 |
 | [`third_party/`](https://github.com/openai/codex/tree/main/third_party) | vendored 依赖（如 V8） |
+
+### [`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs) 内的关键 crate
+
+**核心运行时**
+
+- [`core`](https://github.com/openai/codex/tree/main/codex-rs/core) — 心脏：会话状态机、turn 循环、工具分发、历史/rollout、沙箱粘合
+- [`protocol`](https://github.com/openai/codex/tree/main/codex-rs/protocol) — 各 crate 共享的词汇表：`Submission`、`Op`、`Event`、`ResponseItem`、`SandboxPolicy`、`AskForApproval`
+- [`tools`](https://github.com/openai/codex/tree/main/codex-rs/tools) — core 与客户端共享的工具规格定义
+
+**前端 / 入口**
+
+- [`cli`](https://github.com/openai/codex/tree/main/codex-rs/cli) — `codex` 多合一二进制；解析子命令并分发
+- [`tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) — 交互式 Ratatui 终端 UI（无子命令时的默认）
+- [`exec`](https://github.com/openai/codex/tree/main/codex-rs/exec) — 无头 `codex exec` 模式（CI/脚本）
+- [`mcp-server`](https://github.com/openai/codex/tree/main/codex-rs/mcp-server) — 把 Codex 自身作为 MCP server 通过 stdio 暴露
+- [`app-server`](https://github.com/openai/codex/tree/main/codex-rs/app-server) / [`app-server-protocol`](https://github.com/openai/codex/tree/main/codex-rs/app-server-protocol) — 支撑 IDE/桌面/SDK 的 JSON-RPC 服务 + v1/v2 API 类型
+
+**模型 / API 层**
+
+- [`codex-api`](https://github.com/openai/codex/tree/main/codex-rs/codex-api) — OpenAI Responses API 的 HTTP/WebSocket 客户端（SSE 解析）
+- [`model-provider-info`](https://github.com/openai/codex/tree/main/codex-rs/model-provider-info) / [`model-provider`](https://github.com/openai/codex/tree/main/codex-rs/model-provider) — provider 元数据 + auth 解析
+- [`models-manager`](https://github.com/openai/codex/tree/main/codex-rs/models-manager) — 模型目录
+- [`ollama`](https://github.com/openai/codex/tree/main/codex-rs/ollama)、[`lmstudio`](https://github.com/openai/codex/tree/main/codex-rs/lmstudio) — 本地模型 provider 适配器
+
+**认证**
+
+- [`login`](https://github.com/openai/codex/tree/main/codex-rs/login) — `AuthManager`，OAuth（ChatGPT 登录）与 API key 认证
+- [`chatgpt`](https://github.com/openai/codex/tree/main/codex-rs/chatgpt) — ChatGPT 后端能力（`codex apply`、connectors、cloud tasks）
+
+**沙箱与安全**
+
+- [`sandboxing`](https://github.com/openai/codex/tree/main/codex-rs/sandboxing) — 跨平台沙箱策略引擎（Seatbelt / seccomp+Landlock / Windows restricted token）
+- [`linux-sandbox`](https://github.com/openai/codex/tree/main/codex-rs/linux-sandbox) — Linux 沙箱 helper 二进制（Landlock + seccomp + bwrap）
+- [`execpolicy`](https://github.com/openai/codex/tree/main/codex-rs/execpolicy) — 用 Starlark 规则判定命令是否安全
+- [`exec-server`](https://github.com/openai/codex/tree/main/codex-rs/exec-server) — 本地/远程进程执行服务
+
+**工具积木**
+
+- [`apply-patch`](https://github.com/openai/codex/tree/main/codex-rs/apply-patch) — `apply_patch` 文件编辑工具（也是独立的 arg0 入口）
+- [`codex-mcp`](https://github.com/openai/codex/tree/main/codex-rs/codex-mcp) / [`rmcp-client`](https://github.com/openai/codex/tree/main/codex-rs/rmcp-client) — Codex 作为 MCP **客户端** 连接外部 server
+
+**持久化与基础设施**
+
+- [`config`](https://github.com/openai/codex/tree/main/codex-rs/config)、[`codex-home`](https://github.com/openai/codex/tree/main/codex-rs/codex-home) — `config.toml` 加载与 schema
+- [`rollout`](https://github.com/openai/codex/tree/main/codex-rs/rollout) / [`rollout-trace`](https://github.com/openai/codex/tree/main/codex-rs/rollout-trace)、[`thread-store`](https://github.com/openai/codex/tree/main/codex-rs/thread-store)、[`state`](https://github.com/openai/codex/tree/main/codex-rs/state) — 会话持久化（SQLite + rollout 追踪）
+- [`arg0`](https://github.com/openai/codex/tree/main/codex-rs/arg0) — 多合一二进制分发（`codex` 也能作为 `apply_patch` / `codex-linux-sandbox` 运行）
+- [`otel`](https://github.com/openai/codex/tree/main/codex-rs/otel)、[`analytics`](https://github.com/openai/codex/tree/main/codex-rs/analytics) — 遥测
 
 ### 扩展 crate（[`codex-rs/ext/`](https://github.com/openai/codex/tree/main/codex-rs/ext)）
 
@@ -140,7 +139,7 @@ pub struct Codex {
 - [`goal`](https://github.com/openai/codex/tree/main/codex-rs/ext/goal) — 目标跟踪扩展
 - [`guardian`](https://github.com/openai/codex/tree/main/codex-rs/ext/guardian) — 审查/安全扩展
 - [`image-generation`](https://github.com/openai/codex/tree/main/codex-rs/ext/image-generation) — 图像生成工具
-- [`mcp`](https://github.com/openai/codex/tree/main/codex-rs/ext/mcp) — MCP 服务集成
+- [`mcp`](https://github.com/openai/codex/tree/main/codex-rs/ext/mcp) — 托管 MCP server 集成（把 server 注入目录）
 - [`memories`](https://github.com/openai/codex/tree/main/codex-rs/ext/memories) — 长期记忆
 - [`skills`](https://github.com/openai/codex/tree/main/codex-rs/ext/skills) — Agent skills
 - [`web-search`](https://github.com/openai/codex/tree/main/codex-rs/ext/web-search) — 网页搜索工具
@@ -149,32 +148,25 @@ pub struct Codex {
 
 ## 请求如何流转
 
-### 核心概念（app-server 模型）
+持久化的上下文按 **Thread → Turn → Item** 组织：thread 是一次对话，turn 是一轮用户↔代理交互，item 是一个上下文单元（一条消息、代理推理、一条 shell 命令、一次文件编辑）。
 
-API 暴露三个顶层概念：
+每个接入面都跑**同一套 core 循环**——一个 turn：
 
-- **Thread** — 用户与代理之间的一次对话；包含多个 turn
-- **Turn** — 一轮交互，通常是用户输入 → 代理响应；包含多个 item
-- **Item** — 持久化的上下文单元：用户消息、代理推理、shell 命令、文件编辑等
+1. 输入作为 `Op::UserInput` 进入提交队列。
+2. Session 组装模型上下文：系统指令、skills、git 信息、memories，以及可用工具。
+3. `codex-api` 调用 **OpenAI Responses API**，SSE 流式接收 `ResponseEvent`。
+4. 模型输出以 `Event` 流回——消息增量、推理、工具调用。
+5. 遇到工具调用时，`ToolRouter` 分发到对应处理器（shell、`apply_patch`、文件搜索、MCP……）；命令在沙箱中运行，策略要求时**暂停等待审批**。
+6. 工具结果回灌模型；第 3–6 步重复，直到 turn 结束。
+7. Event 渲染到客户端；历史写入 thread store。
 
-### 交互式 TUI（`codex`）
+**三个接入面只在「输入如何到达、event 如何渲染」上有区别：**
 
-1. 用户在终端 UI（`codex-tui`）输入 prompt。
-2. TUI 发送 **turn start** 和用户输入（经 app-server 或直接连 core）。
-3. Core 在异步提交队列收到 `Op::UserInput`。
-4. **Session** 构建模型上下文：系统指令、skills、插件、git 信息、memories、MCP 工具等。
-5. Core 通过 `codex-api` 调用 **OpenAI Responses API**，SSE 流式接收 `ResponseEvent`。
-6. 模型流式输出时，core 发出 **event**（消息增量、推理、工具调用等）。
-7. 模型请求 **tool call**（shell、`apply_patch`、文件搜索、MCP 等）时：
-   - `ToolRouter` 路由到对应处理器
-   - **审批**可能暂停等待用户确认（执行命令、打补丁、网络访问）
-   - 命令经 **exec-server** 在 **沙箱策略** 下运行
-8. 工具结果回灌模型；循环直到 turn 结束。
-9. Event 流式推到 UI；历史写入 **thread store**。
+- **TUI**（`codex`）——[`codex-tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) 把输入/event 直接接到 core。
+- **app-server**（`codex app-server`）——同一套循环，走 **JSON-RPC 2.0**（stdio/JSONL、unix socket 或 websocket），面向 IDE、桌面和 SDK。
+- **无头**（`codex exec`）——提交 prompt，跑循环，打印结构化输出后退出。
 
-### IDE / SDK（`codex app-server`）
-
-同样的 core 循环，但通过 **JSON-RPC 2.0** 走 stdio（JSONL）、unix socket 或 websocket：
+app-server 消息交互：
 
 ```text
 Client                    app-server                  codex-core
@@ -187,33 +179,38 @@ Client                    app-server                  codex-core
   │◄── turn/completed ──────│◄── turn done ─────────────│
 ```
 
-生命周期：
-
-1. **Initialize** — 客户端发 `initialize` 和 `clientInfo`；服务端返回能力
-2. **Start/resume thread** — `thread/start`、`thread/resume` 或 `thread/fork`
-3. **Begin turn** — `turn/start`，带 `threadId` 和用户输入
-4. **Stream events** — 通知：`item/started`、`item/completed`、`item/agentMessage/delta`、工具进度
-5. **Finish turn** — `turn/completed`，含最终状态和 token 用量
-
-### 无头模式（`codex exec`）
-
-面向 CI/脚本的非交互模式：提交 prompt，跑代理循环，打印结构化输出后退出。
-
 ### 执行路径中的沙箱
 
-工具执行外包一层平台相关的强制隔离：
+工具执行外包一层平台相关的隔离，由 `SandboxPolicy` 加审批 gate 约束：
 
 | 平台 | 机制 |
 |------|------|
 | **macOS** | Seatbelt（`/usr/bin/sandbox-exec`） |
-| **Linux** | bubblewrap（`bwrap`），旧策略下可回退 Landlock |
+| **Linux** | bubblewrap（`bwrap`）+ Landlock/seccomp |
 | **Windows** | Restricted-token sandbox（提升/非提升两种后端） |
 
-执行命令和文件系统访问由 `SandboxPolicy` / permissions 配置约束。用户审批可以阻止或放行单次操作。
+在 OS 沙箱生效之前，[`execpolicy`](https://github.com/openai/codex/tree/main/codex-rs/execpolicy)（Starlark 规则引擎）会先判定命令是安全还是需要审批。`exec-server` 可本地运行，也可注册到远程 registry（WebSocket 上的 Noise 加密 relay），用于跨机器执行。
 
-### 远程执行
+### 关键代码锚点
 
-`exec-server` 可本地运行（WebSocket），也可注册到远程环境 registry。远程模式通过 WebSocket 上的 **Noise 加密 relay 帧** 跨机器控制进程——适合 app-server 和 exec-server 跑在不同 OS 上的场景。
+| 概念 | 位置 |
+| ---- | ---- |
+| `Codex` 句柄（队列对） | [`core/src/session/mod.rs`](https://github.com/openai/codex/tree/main/codex-rs/core/src/session/mod.rs) |
+| 提交循环（`Op` 分发） | [`core/src/session/handlers.rs`](https://github.com/openai/codex/tree/main/codex-rs/core/src/session/handlers.rs) |
+| Turn 执行（`run_turn`） | [`core/src/session/turn.rs`](https://github.com/openai/codex/tree/main/codex-rs/core/src/session/turn.rs) |
+| 模型客户端（SSE / WebSocket） | [`core/src/client.rs`](https://github.com/openai/codex/tree/main/codex-rs/core/src/client.rs) |
+| 工具路由 / 分发 | [`core/src/tools/router.rs`](https://github.com/openai/codex/tree/main/codex-rs/core/src/tools/router.rs) |
+| Shell 执行 + 沙箱选择 | [`core/src/exec.rs`](https://github.com/openai/codex/tree/main/codex-rs/core/src/exec.rs) |
+| 多合一二进制分发（`arg0`） | [`arg0/src/lib.rs`](https://github.com/openai/codex/tree/main/codex-rs/arg0/src/lib.rs) |
+
+---
+
+## MCP：双向
+
+Codex 在两个方向上都讲 **Model Context Protocol**。
+
+- **作为 server**（[`mcp-server`](https://github.com/openai/codex/tree/main/codex-rs/mcp-server)）—— 一个 stdio JSON-RPC 循环，只暴露两个工具 `codex` 和 `codex-reply`。一次 `tools/call` 会拉起完整的 Codex 会话，提交 `Op::UserInput`，并把 core 的 `EventMsg` 作为 MCP 响应流式返回；审批请求变成 MCP **elicitation**。由此，任何别的代理都能驱动一个完整的 Codex 会话。
+- **作为 client** —— 为了拿到更多工具，Codex 会连出去接外部 MCP server。[`rmcp-client`](https://github.com/openai/codex/tree/main/codex-rs/rmcp-client)（`RmcpClient`，stdio/HTTP + OAuth）是传输层；[`codex-mcp`](https://github.com/openai/codex/tree/main/codex-rs/codex-mcp)（`McpConnectionManager`）为每个 server 启一个 client，聚合它们的工具并处理命名冲突。turn 期间，这些工具注册为 `McpHandler`，调用沿 `handle_mcp_tool_call` → `McpConnectionManager::call_tool` → `RmcpClient` 路由。[`ext/mcp`](https://github.com/openai/codex/tree/main/codex-rs/ext/mcp) 通过 feature flag 注入托管 server（如 Codex Apps）。
 
 ---
 
@@ -239,14 +236,14 @@ Client                    app-server                  codex-core
 
 ## 心智模型
 
-可以把 Codex 想成四个协作系统：
+四个协作系统，都围绕 core 的 session/turn 循环组合：
 
 1. **对话引擎** — threads、turns、上下文组装、模型流式输出
 2. **工具运行时** — shell、补丁、搜索、MCP、扩展
 3. **安全层** — 沙箱、执行策略、审批
 4. **集成面** — TUI、app-server JSON-RPC、SDK、`exec` 模式
 
-`codex` 二进制是唯一入口。其余都围绕 core 的 session/turn 循环组合：流式模型响应 → 执行工具 → 持久化状态 → 发出 event。
+`codex` 二进制是唯一入口；其余都遵循同一个节奏：**流式模型响应 → 执行工具 → 持久化状态 → 发出 event。**
 
 ---
 

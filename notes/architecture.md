@@ -2,7 +2,7 @@
 
 **English** | [中文](architecture_cn.md)
 
-High-level overview of the [openai/codex](https://github.com/openai/codex) repository — what it does, how it is structured, how requests flow, and what technologies it uses.
+High-level overview of the [openai/codex](https://github.com/openai/codex) repository — what it does, how it is built, how a request flows, and what it is built with.
 
 > How this note was produced: [case 005](../cases/005-learn-codex-repo/case.md) · flow: [learn-codebase-flow.md](learn-codebase-flow.md) · prompt: [learn-repo-overview.md](../prompts/learn-repo-overview.md)  
 > For a layer-by-layer walkthrough, see [layeredDesign.md](layeredDesign.md) (English) or [layeredDesign_cn.md](layeredDesign_cn.md) (中文).
@@ -11,27 +11,15 @@ High-level overview of the [openai/codex](https://github.com/openai/codex) repos
 
 ## What This Project Does
 
-**Codex CLI** is a local coding agent from OpenAI. It runs on your machine and can:
+**Codex CLI** is a local coding agent from OpenAI. Given a natural-language task ("fix this test", "refactor this module"), it plans and executes work with an LLM plus built-in tools — reading and editing files, running shell commands, searching the web, and calling MCP tools — all inside configurable **sandbox and approval** policies. Conversation history is persisted as **threads** and **turns**.
 
-- Accept natural-language tasks ("fix this test", "refactor this module", etc.)
-- Plan and execute work using LLM reasoning plus built-in tools
-- Read and edit files, run shell commands, search the web, and call MCP tools
-- Operate inside configurable sandbox and approval policies
-- Persist conversation history as **threads** and **turns**
-
-The shipped binary is `codex`. The npm package `@openai/codex` is a thin wrapper that invokes the native binary.
-
-Related products (not all in this repo):
-
-- **Codex in IDE** — VS Code, Cursor, Windsurf via the app-server protocol
-- **Codex App** — desktop experience (`codex app`)
-- **Codex Web** — cloud-based agent at chatgpt.com/codex
+The shipped binary is `codex`; the npm package `@openai/codex` is a thin wrapper that execs the native binary. The same core also powers **Codex in IDE** (VS Code, Cursor, Windsurf — via app-server), the **Codex App** desktop experience (`codex app`), and the cloud agent **Codex Web** (chatgpt.com/codex).
 
 ---
 
 ## Main Architecture
 
-The repo is a **Rust-first monorepo** ([`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs)) with ~100 crates, plus Node/TypeScript packaging and SDKs.
+A **Rust-first monorepo** ([`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs), ~130 crates) plus Node/TypeScript packaging and SDKs. Clients sit on top, capability providers (model API, execution, MCP, sandbox) below, and one `codex-core` orchestrates the middle.
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -65,73 +53,84 @@ The repo is a **Rust-first monorepo** ([`codex-rs/`](https://github.com/openai/c
     │    OpenAI     │ │  subprocess   │ │   MCP tool    │ │macOS Seatbelt │
     │   Responses   │ │     / PTY     │ │    servers    │ │  Linux bwrap  │
     │   API (SSE)   │ │ local/remote  │ │               │ │  Win restr.   │
-    │               │ │               │ │               │ │               │
-    │               │ │               │ │               │ │               │
-    │               │ │               │ │               │ │               │
     └───────────────┘ └───────────────┘ └───────────────┘ └───────────────┘
 ```
 
-> **Note:** This ASCII diagram uses a fixed 79-column layout so boxes, connectors, and bottom modules align in monospace viewers.
+> The diagram uses a fixed 79-column layout so boxes and connectors align in monospace viewers.
 
-### Layered design
-
-| Layer | Crate(s) | Role |
-| ----- | -------- | ---- |
-| **Entry points** | [`codex-cli`](https://github.com/openai/codex/tree/main/codex-rs/cli) | `codex` binary dispatches to TUI, `app-server`, `exec`, MCP, plugins, etc. |
-| **Protocol** | [`codex-protocol`](https://github.com/openai/codex/tree/main/codex-rs/protocol) | Shared types for ops, events, config, thread/turn items |
-| **Core** | [`codex-core`](https://github.com/openai/codex/tree/main/codex-rs/core) | Agent loop, session management, context building, tool orchestration |
-| **API client** | [`codex-api`](https://github.com/openai/codex/tree/main/codex-rs/codex-api), [`codex-client`](https://github.com/openai/codex/tree/main/codex-rs/codex-client) | Wire protocol to OpenAI Responses API (SSE streaming) |
-| **Execution** | [`exec-server`](https://github.com/openai/codex/tree/main/codex-rs/exec-server) | Spawns and controls subprocesses; can run locally or remotely |
-| **Sandboxing** | [`sandboxing`](https://github.com/openai/codex/tree/main/codex-rs/sandboxing), [`linux-sandbox`](https://github.com/openai/codex/tree/main/codex-rs/linux-sandbox), [`windows-sandbox-rs`](https://github.com/openai/codex/tree/main/codex-rs/windows-sandbox-rs) | Platform-specific isolation |
-| **Extensions** | [`ext/*`](https://github.com/openai/codex/tree/main/codex-rs/ext) | Skills, MCP, connectors, memories, web search, goals, etc. |
-| **IDE integration** | [`app-server`](https://github.com/openai/codex/tree/main/codex-rs/app-server), [`app-server-protocol`](https://github.com/openai/codex/tree/main/codex-rs/app-server-protocol) | JSON-RPC API for VS Code extension and other rich UIs |
-
-[`codex-core`](https://github.com/openai/codex/tree/main/codex-rs/core) is the central orchestrator, but the repo actively resists growing it further. New features tend to land in dedicated crates ([`codex-tools`](https://github.com/openai/codex/tree/main/codex-rs/tools), [`ext/*`](https://github.com/openai/codex/tree/main/codex-rs/ext), etc.).
-
-### Core abstraction: queue pair
-
-`codex-core` exposes `Codex` as a high-level handle that operates as a **queue pair**: callers send `Op` submissions and receive `Event` streams.
+At the center, `codex-core` exposes `Codex` as a **queue pair**: callers submit `Op`s and receive `Event`s. This one abstraction backs every surface.
 
 ```rust
 pub struct Codex {
-    pub(crate) tx_sub: Sender<Submission>,
-    pub(crate) rx_event: Receiver<Event>,
-    pub(crate) agent_status: watch::Receiver<AgentStatus>,
-    pub(crate) session: Arc<Session>,
+    tx_sub: Sender<Submission>,  // in:  UserInput, ExecApproval, PatchApproval, Interrupt, ...
+    rx_event: Receiver<Event>,   // out: message deltas, tool progress, approval requests, turn done, ...
     // ...
 }
 ```
 
-Key inbound operations (`Op`): `UserInput`, `ExecApproval`, `PatchApproval`, `Interrupt`, `ThreadSettings`, etc.
-
-Key outbound messages (`Event` / `EventMsg`): agent message deltas, tool progress, approval requests, turn completion, errors.
+`codex-core` is the central orchestrator, but the repo deliberately keeps it from growing — new features land in dedicated crates ([`codex-tools`](https://github.com/openai/codex/tree/main/codex-rs/tools), [`ext/*`](https://github.com/openai/codex/tree/main/codex-rs/ext), etc.). The next section is the map of those crates.
 
 ---
 
 ## Important Folders
 
+### Top-level layout
+
 | Path | Purpose |
 | ---- | ------- |
-| [`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs) | Main Rust workspace — almost all implementation |
-| [`codex-rs/core/`](https://github.com/openai/codex/tree/main/codex-rs/core) | Agent business logic: sessions, turns, tools, context, approvals |
-| [`codex-rs/cli/`](https://github.com/openai/codex/tree/main/codex-rs/cli) | `codex` binary entry point and subcommand routing |
-| [`codex-rs/tui/`](https://github.com/openai/codex/tree/main/codex-rs/tui) | Terminal UI (ratatui) |
-| [`codex-rs/app-server/`](https://github.com/openai/codex/tree/main/codex-rs/app-server) | JSON-RPC server for IDE/desktop integrations |
-| [`codex-rs/app-server-protocol/`](https://github.com/openai/codex/tree/main/codex-rs/app-server-protocol) | v1/v2 API types (Rust + generated TypeScript schemas) |
-| [`codex-rs/protocol/`](https://github.com/openai/codex/tree/main/codex-rs/protocol) | Internal protocol types shared across core, TUI, app-server |
-| [`codex-rs/codex-api/`](https://github.com/openai/codex/tree/main/codex-rs/codex-api) | OpenAI Responses API client and SSE parsing |
-| [`codex-rs/exec-server/`](https://github.com/openai/codex/tree/main/codex-rs/exec-server) | Remote/local process execution server |
-| [`codex-rs/sandboxing/`](https://github.com/openai/codex/tree/main/codex-rs/sandboxing) | Cross-platform sandbox policies and enforcement |
-| [`codex-rs/tools/`](https://github.com/openai/codex/tree/main/codex-rs/tools) | Tool specs, adapters, and shared tool contracts |
-| [`codex-rs/ext/`](https://github.com/openai/codex/tree/main/codex-rs/ext) | Optional extensions: skills, MCP, connectors, memories, web-search, etc. |
-| [`codex-rs/config/`](https://github.com/openai/codex/tree/main/codex-rs/config) | `config.toml` loading and schema |
-| [`codex-rs/thread-store/`](https://github.com/openai/codex/tree/main/codex-rs/thread-store) | Persistent thread/turn storage (SQLite) |
-| [`codex-rs/rollout/`](https://github.com/openai/codex/tree/main/codex-rs/rollout) | Session rollout traces for debugging/replay |
-| [`codex-cli/`](https://github.com/openai/codex/tree/main/codex-cli) | npm package (`@openai/codex`) — distribution wrapper |
-| [`sdk/`](https://github.com/openai/codex/tree/main/sdk) | TypeScript and Python SDKs for embedding Codex |
-| [`docs/`](https://github.com/openai/codex/tree/main/docs) | Contributor docs (install, config, sandbox, contributing) |
-| [`scripts/`](https://github.com/openai/codex/tree/main/scripts), [`bazel/`](https://github.com/openai/codex/tree/main/bazel), [`justfile`](https://github.com/openai/codex/blob/main/justfile) | Build, test, and dev automation |
+| [`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs) | The Rust workspace (~130 crates) — the actual product; almost all implementation |
+| [`codex-cli/`](https://github.com/openai/codex/tree/main/codex-cli) | Thin npm package (`@openai/codex`); [`bin/codex.js`](https://github.com/openai/codex/blob/main/codex-cli/bin/codex.js) just execs the platform-native Rust binary |
+| [`sdk/`](https://github.com/openai/codex/tree/main/sdk) | Public **TypeScript** and **Python** SDKs for embedding Codex |
+| [`docs/`](https://github.com/openai/codex/tree/main/docs) | User/contributor docs (mostly stubs pointing at developers.openai.com) |
+| [`scripts/`](https://github.com/openai/codex/tree/main/scripts), [`tools/`](https://github.com/openai/codex/tree/main/tools), [`bazel/`](https://github.com/openai/codex/tree/main/bazel), [`patches/`](https://github.com/openai/codex/tree/main/patches), [`justfile`](https://github.com/openai/codex/blob/main/justfile) | Build, release, and dev tooling |
 | [`third_party/`](https://github.com/openai/codex/tree/main/third_party) | Vendored dependencies (e.g. V8) |
+
+### Key crates inside [`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs)
+
+**Core runtime**
+
+- [`core`](https://github.com/openai/codex/tree/main/codex-rs/core) — the heart: session state machine, turn loop, tool dispatch, history/rollout, sandbox glue
+- [`protocol`](https://github.com/openai/codex/tree/main/codex-rs/protocol) — the shared vocabulary every crate speaks: `Submission`, `Op`, `Event`, `ResponseItem`, `SandboxPolicy`, `AskForApproval`
+- [`tools`](https://github.com/openai/codex/tree/main/codex-rs/tools) — tool spec definitions shared between core and clients
+
+**Front ends / entry points**
+
+- [`cli`](https://github.com/openai/codex/tree/main/codex-rs/cli) — the `codex` multitool binary; parses subcommands and dispatches
+- [`tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) — interactive Ratatui terminal UI (default when no subcommand)
+- [`exec`](https://github.com/openai/codex/tree/main/codex-rs/exec) — headless `codex exec` mode (CI/scripts)
+- [`mcp-server`](https://github.com/openai/codex/tree/main/codex-rs/mcp-server) — exposes Codex itself as an MCP server over stdio
+- [`app-server`](https://github.com/openai/codex/tree/main/codex-rs/app-server) / [`app-server-protocol`](https://github.com/openai/codex/tree/main/codex-rs/app-server-protocol) — JSON-RPC server + v1/v2 API types backing IDE/desktop/SDK
+
+**Model / API layer**
+
+- [`codex-api`](https://github.com/openai/codex/tree/main/codex-rs/codex-api) — HTTP/WebSocket client for the OpenAI Responses API (SSE parsing)
+- [`model-provider-info`](https://github.com/openai/codex/tree/main/codex-rs/model-provider-info) / [`model-provider`](https://github.com/openai/codex/tree/main/codex-rs/model-provider) — provider metadata + auth resolution
+- [`models-manager`](https://github.com/openai/codex/tree/main/codex-rs/models-manager) — the model catalog
+- [`ollama`](https://github.com/openai/codex/tree/main/codex-rs/ollama), [`lmstudio`](https://github.com/openai/codex/tree/main/codex-rs/lmstudio) — local model provider adapters
+
+**Auth**
+
+- [`login`](https://github.com/openai/codex/tree/main/codex-rs/login) — `AuthManager`, OAuth (ChatGPT sign-in) and API-key auth
+- [`chatgpt`](https://github.com/openai/codex/tree/main/codex-rs/chatgpt) — ChatGPT-backend features (`codex apply`, connectors, cloud tasks)
+
+**Sandboxing & safety**
+
+- [`sandboxing`](https://github.com/openai/codex/tree/main/codex-rs/sandboxing) — cross-platform sandbox policy engine (Seatbelt / seccomp+Landlock / Windows restricted token)
+- [`linux-sandbox`](https://github.com/openai/codex/tree/main/codex-rs/linux-sandbox) — Linux sandbox helper binary (Landlock + seccomp + bwrap)
+- [`execpolicy`](https://github.com/openai/codex/tree/main/codex-rs/execpolicy) — Starlark rule engine that classifies command safety
+- [`exec-server`](https://github.com/openai/codex/tree/main/codex-rs/exec-server) — local/remote process execution server
+
+**Tool building blocks**
+
+- [`apply-patch`](https://github.com/openai/codex/tree/main/codex-rs/apply-patch) — the `apply_patch` file-edit tool (also a standalone arg0 entry)
+- [`codex-mcp`](https://github.com/openai/codex/tree/main/codex-rs/codex-mcp) / [`rmcp-client`](https://github.com/openai/codex/tree/main/codex-rs/rmcp-client) — Codex as an MCP **client** to external servers
+
+**Persistence & infra**
+
+- [`config`](https://github.com/openai/codex/tree/main/codex-rs/config), [`codex-home`](https://github.com/openai/codex/tree/main/codex-rs/codex-home) — `config.toml` loading and schema
+- [`rollout`](https://github.com/openai/codex/tree/main/codex-rs/rollout) / [`rollout-trace`](https://github.com/openai/codex/tree/main/codex-rs/rollout-trace), [`thread-store`](https://github.com/openai/codex/tree/main/codex-rs/thread-store), [`state`](https://github.com/openai/codex/tree/main/codex-rs/state) — session persistence (SQLite + rollout traces)
+- [`arg0`](https://github.com/openai/codex/tree/main/codex-rs/arg0) — multi-call binary dispatch (`codex` also runs as `apply_patch` / `codex-linux-sandbox`)
+- [`otel`](https://github.com/openai/codex/tree/main/codex-rs/otel), [`analytics`](https://github.com/openai/codex/tree/main/codex-rs/analytics) — telemetry
 
 ### Extension crates ([`codex-rs/ext/`](https://github.com/openai/codex/tree/main/codex-rs/ext))
 
@@ -140,41 +139,34 @@ Key outbound messages (`Event` / `EventMsg`): agent message deltas, tool progres
 - [`goal`](https://github.com/openai/codex/tree/main/codex-rs/ext/goal) — goal-tracking extension
 - [`guardian`](https://github.com/openai/codex/tree/main/codex-rs/ext/guardian) — review/safety extension
 - [`image-generation`](https://github.com/openai/codex/tree/main/codex-rs/ext/image-generation) — image generation tools
-- [`mcp`](https://github.com/openai/codex/tree/main/codex-rs/ext/mcp) — MCP server integration
+- [`mcp`](https://github.com/openai/codex/tree/main/codex-rs/ext/mcp) — hosted MCP server integration (contributes servers into the catalog)
 - [`memories`](https://github.com/openai/codex/tree/main/codex-rs/ext/memories) — long-term memory
 - [`skills`](https://github.com/openai/codex/tree/main/codex-rs/ext/skills) — agent skills
 - [`web-search`](https://github.com/openai/codex/tree/main/codex-rs/ext/web-search) — web search tools
 
 ---
 
-## How Requests Flow Through the System
+## How a Request Flows
 
-### Core primitives (app-server model)
+Persisted context is organized as **Thread → Turn → Item**: a thread is a conversation, a turn is one user↔agent exchange, and an item is a unit of context (a message, agent reasoning, a shell command, a file edit).
 
-The API exposes three top-level concepts:
+Every surface runs the **same core loop** — one turn:
 
-- **Thread** — a conversation between user and agent; contains multiple turns
-- **Turn** — one exchange, typically user input → agent response; contains multiple items
-- **Item** — a persisted unit of context: user message, agent reasoning, shell command, file edit, etc.
+1. Input arrives as `Op::UserInput` on the submission queue.
+2. The session assembles model context: instructions, skills, git info, memories, and the available tools.
+3. `codex-api` calls the **OpenAI Responses API**, streaming `ResponseEvent`s (SSE).
+4. Model output streams back as `Event`s — message deltas, reasoning, tool calls.
+5. On a tool call, `ToolRouter` dispatches to a handler (shell, `apply_patch`, file search, MCP, …); commands run through the sandbox, **pausing for approval** when policy requires.
+6. Tool results feed back into the model; steps 3–6 repeat until the turn completes.
+7. Events render in the client; history persists to the thread store.
 
-### Interactive TUI (`codex`)
+**The three surfaces differ only in how input arrives and events are rendered:**
 
-1. User types a prompt in the terminal UI (`codex-tui`).
-2. TUI sends a **turn start** with user input (via app-server or core directly).
-3. Core receives `Op::UserInput` on an async submission queue.
-4. A **session** builds model context: system instructions, skills, plugins, git info, memories, MCP tools, etc.
-5. Core calls the **OpenAI Responses API** via `codex-api`, streaming SSE `ResponseEvent`s.
-6. As the model streams output, core emits **events** (message deltas, reasoning, tool calls, etc.).
-7. When the model requests a **tool call** (shell, `apply_patch`, file search, MCP, etc.):
-   - `ToolRouter` routes to the right handler
-   - **Approvals** may pause for user consent (exec commands, patches, network)
-   - Commands run through **exec-server** under **sandbox policy**
-8. Tool results are fed back into the model; the loop continues until the turn completes.
-9. Events stream to the UI; history is persisted to the **thread store**.
+- **TUI** (`codex`) — [`codex-tui`](https://github.com/openai/codex/tree/main/codex-rs/tui) wires input/events directly to core.
+- **app-server** (`codex app-server`) — the same loop over **JSON-RPC 2.0** (stdio/JSONL, unix socket, or websocket) for IDEs, desktop, and SDKs.
+- **Headless** (`codex exec`) — submit a prompt, run the loop, print structured output, exit.
 
-### IDE / SDK (`codex app-server`)
-
-Same core loop, but over **JSON-RPC 2.0** on stdio (JSONL), unix socket, or websocket:
+app-server message exchange:
 
 ```text
 Client                    app-server                  codex-core
@@ -187,33 +179,38 @@ Client                    app-server                  codex-core
   │◄── turn/completed ──────│◄── turn done ─────────────│
 ```
 
-Lifecycle:
-
-1. **Initialize** — client sends `initialize` with `clientInfo`; server responds with capabilities
-2. **Start/resume thread** — `thread/start`, `thread/resume`, or `thread/fork`
-3. **Begin turn** — `turn/start` with `threadId` and user input
-4. **Stream events** — notifications: `item/started`, `item/completed`, `item/agentMessage/delta`, tool progress
-5. **Finish turn** — `turn/completed` with final state and token usage
-
-### Headless (`codex exec`)
-
-Non-interactive mode for CI/scripts: submits a prompt, runs the agent loop, prints structured output, exits.
-
 ### Sandboxing in the execution path
 
-Platform-specific enforcement wraps tool execution:
+Tool execution is wrapped by platform-specific isolation, governed by `SandboxPolicy` plus approval gates:
 
-| Platform    | Mechanism                                                        |
-| ----------- | ---------------------------------------------------------------- |
-| **macOS**   | Seatbelt (`/usr/bin/sandbox-exec`)                               |
-| **Linux**   | bubblewrap (`bwrap`), with Landlock fallback for legacy policies |
-| **Windows** | Restricted-token sandbox (elevated and unelevated backends)      |
+| Platform    | Mechanism                                                   |
+| ----------- | ----------------------------------------------------------- |
+| **macOS**   | Seatbelt (`/usr/bin/sandbox-exec`)                          |
+| **Linux**   | bubblewrap (`bwrap`) + Landlock/seccomp                     |
+| **Windows** | Restricted-token sandbox (elevated / unelevated backends)   |
 
-Exec commands and filesystem access are governed by `SandboxPolicy` / permissions profiles. User approval gates can block or allow individual operations.
+Before the OS sandbox even applies, [`execpolicy`](https://github.com/openai/codex/tree/main/codex-rs/execpolicy) (a Starlark rule engine) classifies whether a command is safe or needs approval. `exec-server` can run locally or register with a remote registry (Noise-encrypted relay over WebSocket) for cross-machine execution.
 
-### Remote execution
+### Key code anchors
 
-`exec-server` can run locally (WebSocket) or register with a remote environment registry. Remote mode uses Noise-encrypted relay frames over WebSocket for cross-machine process control — useful when the app-server and exec-server run on different OSes.
+| Concept | Location |
+| ------- | -------- |
+| `Codex` handle (queue pair) | [`core/src/session/mod.rs`](https://github.com/openai/codex/tree/main/codex-rs/core/src/session/mod.rs) |
+| Submission loop (`Op` dispatch) | [`core/src/session/handlers.rs`](https://github.com/openai/codex/tree/main/codex-rs/core/src/session/handlers.rs) |
+| Turn execution (`run_turn`) | [`core/src/session/turn.rs`](https://github.com/openai/codex/tree/main/codex-rs/core/src/session/turn.rs) |
+| Model client (SSE / WebSocket) | [`core/src/client.rs`](https://github.com/openai/codex/tree/main/codex-rs/core/src/client.rs) |
+| Tool routing / dispatch | [`core/src/tools/router.rs`](https://github.com/openai/codex/tree/main/codex-rs/core/src/tools/router.rs) |
+| Shell exec + sandbox selection | [`core/src/exec.rs`](https://github.com/openai/codex/tree/main/codex-rs/core/src/exec.rs) |
+| Multi-call binary dispatch (`arg0`) | [`arg0/src/lib.rs`](https://github.com/openai/codex/tree/main/codex-rs/arg0/src/lib.rs) |
+
+---
+
+## MCP: Both Directions
+
+Codex speaks the **Model Context Protocol on both sides**.
+
+- **As a server** ([`mcp-server`](https://github.com/openai/codex/tree/main/codex-rs/mcp-server)) — a stdio JSON-RPC loop exposing exactly two tools, `codex` and `codex-reply`. A `tools/call` spins up a full Codex session, submits `Op::UserInput`, and streams core `EventMsg`s back as MCP responses; approval requests become MCP **elicitations**. Any other agent can thus drive a complete Codex session.
+- **As a client** — to gain extra tools, Codex connects out to external MCP servers. [`rmcp-client`](https://github.com/openai/codex/tree/main/codex-rs/rmcp-client) (`RmcpClient`, stdio/HTTP + OAuth) is the transport; [`codex-mcp`](https://github.com/openai/codex/tree/main/codex-rs/codex-mcp) (`McpConnectionManager`) starts one client per server, aggregates their tools, and handles name collisions. During a turn, those tools register as `McpHandler`s and calls route `handle_mcp_tool_call` → `McpConnectionManager::call_tool` → `RmcpClient`. [`ext/mcp`](https://github.com/openai/codex/tree/main/codex-rs/ext/mcp) contributes hosted servers (e.g. Codex Apps) via feature flags.
 
 ---
 
@@ -239,14 +236,14 @@ Exec commands and filesystem access are governed by `SandboxPolicy` / permission
 
 ## Mental Model
 
-Think of Codex as four cooperating systems:
+Four cooperating systems, all composed around the core session/turn loop:
 
 1. **Conversation engine** — threads, turns, context assembly, model streaming
 2. **Tool runtime** — shell, patches, search, MCP, extensions
 3. **Safety layer** — sandboxing, exec policy, approvals
 4. **Integration surface** — TUI, app-server JSON-RPC, SDKs, `exec` mode
 
-The `codex` binary is the single entry point. Everything else composes around the core session/turn loop: stream model responses → execute tools → persist state → emit events.
+The `codex` binary is the single entry point; everything else follows one rhythm: **stream model responses → execute tools → persist state → emit events.**
 
 ---
 
