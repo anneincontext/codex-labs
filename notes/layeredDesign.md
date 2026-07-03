@@ -33,7 +33,7 @@ You (user / IDE / SDK)
 
 **Role:** The **single executable entry point** for the whole system (the `codex` command).
 
-When you run `codex` in a terminal, you are running the binary built from `codex-rs/cli`. It does **not** do agent reasoning itself — it **routes** to the right mode:
+When you run `codex` in a terminal, you are running the binary built from [`codex-rs/cli`](https://github.com/openai/codex/tree/main/codex-rs/cli). It does **not** do agent reasoning itself — it **routes** to the right mode:
 
 | Subcommand / mode | What it does |
 |-------------------|--------------|
@@ -236,6 +236,22 @@ Example: "Fix this test" from VS Code:
 
 ## Further reading
 
+### This repo (codex-labs)
+
 - [architecture.md](architecture.md) / [architecture_cn.md](architecture_cn.md) — repository architecture overview
-- [openai/codex](https://github.com/openai/codex) — source repository
+- [resources/links.md](../resources/links.md) / [links_zh.md](../resources/links_zh.md) — curated external links
+
+### [openai/codex](https://github.com/openai/codex) on GitHub
+
+- [README.md](https://github.com/openai/codex/blob/main/README.md) — project overview and quickstart
+- [AGENTS.md](https://github.com/openai/codex/blob/main/AGENTS.md) — contributor conventions and crate guidance
+- [codex-rs/app-server/README.md](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md) — app-server protocol and API reference
+- [codex-rs/core/README.md](https://github.com/openai/codex/blob/main/codex-rs/core/README.md) — sandbox platform requirements
+- [codex-rs/codex-api/README.md](https://github.com/openai/codex/blob/main/codex-rs/codex-api/README.md) — Responses API client interface
+- [codex-rs/exec-server/README.md](https://github.com/openai/codex/blob/main/codex-rs/exec-server/README.md) — process execution server
+- [codex-rs/protocol/README.md](https://github.com/openai/codex/blob/main/codex-rs/protocol/README.md) — shared protocol types
+- [codex-rs/tools/README.md](https://github.com/openai/codex/blob/main/codex-rs/tools/README.md) — tool specs and contracts
+
+### Official docs
+
 - [Codex documentation](https://developers.openai.com/codex)

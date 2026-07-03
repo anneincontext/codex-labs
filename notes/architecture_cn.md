@@ -30,61 +30,62 @@
 
 ## 整体架构
 
-仓库是一个 **Rust 优先的 monorepo**（`codex-rs/`），约 100 个 crate，外加 Node/TypeScript 打包和 SDK。
+仓库是一个 **Rust 优先的 monorepo**（[`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs)），约 100 个 crate，外加 Node/TypeScript 打包和 SDK。
 
 ```text
-┌─────────────────────────── 客户端 / 入口 ────────────────────────────────────┐
-│                                                                              │
-│   codex-cli（二进制）                                                        │
-│        │                                                                     │
-│        ├──► codex-tui          交互式终端 UI                                   │
-│        ├──► codex app-server   JSON-RPC（IDE、桌面、SDK）                      │
-│        └──► codex exec         无头 / CI 模式                                │
-│                                                                              │
-│   SDK（TypeScript、Python）──► app-server                                    │
-│                                                                              │
-└──────────────────────────────────────┬───────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                客户端 / 入口                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ codex-cli (binary)                                                          │
+│      │                                                                      │
+│      ├─► codex-tui           interactive terminal UI                        │
+│      ├─► codex app-server    JSON-RPC (IDE, desktop, SDKs)                  │
+│      └─► codex exec          headless / CI mode                             │
+│                                                                             │
+│ SDKs (TypeScript, Python) ─────────────────────────────► app-server         │
+└──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
                                        ▼
-┌────────────────────────────── 代理核心 ────────────────────────────────────────┐
-│                                                                              │
-│   codex-core                                                                 │
-│        │                                                                     │
-│        ├── codex-protocol      共享 Op / Event / 配置类型                    │
-│        ├── codex-tools         工具规格、路由、执行契约                        │
-│        └── thread-store        SQLite 持久化 + rollout 追踪                    │
-│                                                                              │
-│   Codex = 队列对：submit(Op) ──► session loop ──► receive(Event)             │
-│                                                                              │
-└───────┬──────────────┬──────────────┬──────────────┬───────────────────────┘
-        │              │              │              │
-        ▼              ▼              ▼              ▼
-┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────────┐
-│  codex-api  │ │ exec-server │ │  codex-mcp  │ │  sandboxing                 │
-│             │ │             │ │             │ │                             │
-│  OpenAI     │ │  子进程     │ │  MCP 工具   │ │  macOS: Seatbelt            │
-│  Responses  │ │  / PTY      │ │  服务       │ │  Linux: bubblewrap          │
-│  API (SSE)  │ │  本地或远程 │ │             │ │  Windows: restricted token  │
-│             │ │             │ │             │ │                             │
-└─────────────┘ └─────────────┘ └─────────────┘ └─────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                   代理核心                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ codex-core                                                                  │
+│      │                                                                      │
+│      ├─ codex-protocol       shared Op / Event / config types               │
+│      ├─ codex-tools          tool specs, routing, execution                 │
+│      └─ thread-store         SQLite persistence + rollout traces            │
+│                                                                             │
+│ Codex = queue pair:  submit(Op) ──► session loop ──► receive(Event)         │
+└───────────┬─────────────────┬─────────────────┬─────────────────┬───────────┘
+            │                 │                 │                 │
+            ▼                 ▼                 ▼                 ▼
+    ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐
+    │   codex-api   │ │  exec-server  │ │   codex-mcp   │ │  sandboxing   │
+    │    OpenAI     │ │  subprocess   │ │   MCP tool    │ │macOS Seatbelt │
+    │   Responses   │ │     / PTY     │ │    servers    │ │  Linux bwrap  │
+    │   API (SSE)   │ │ local/remote  │ │               │ │  Win restr.   │
+    │               │ │               │ │               │ │               │
+    │               │ │               │ │               │ │               │
+    │               │ │               │ │               │ │               │
+    └───────────────┘ └───────────────┘ └───────────────┘ └───────────────┘
 ```
 
-> **说明：** Mermaid 图在 GitHub 和部分编辑器里能渲染，普通 markdown 阅读器不行。本地阅读以这份 ASCII 图为准。
+> **说明：** 图中 crate 名与英文标签保留英文，以便在等宽字体下对齐。中文标题仅用于分区标识。
 
 ### 分层设计
 
 | 层 | Crate | 职责 |
-|----|-------|------|
-| **入口** | `codex-cli` | `codex` 二进制路由到 TUI、`app-server`、`exec`、MCP、插件等 |
-| **协议** | `codex-protocol` | 共享的 op、event、配置、thread/turn item 类型 |
-| **核心** | `codex-core` | 代理循环、会话管理、上下文构建、工具编排 |
-| **API 客户端** | `codex-api`、`codex-client` | 与 OpenAI Responses API 通信（SSE 流式） |
-| **执行** | `exec-server` | 拉起和控制子进程；可本地或远程 |
-| **沙箱** | `sandboxing`、`linux-sandbox`、`windows-sandbox-rs` | 平台相关的隔离机制 |
-| **扩展** | `ext/*` | Skills、MCP、connectors、memories、网页搜索、goal 等 |
-| **IDE 集成** | `app-server`、`app-server-protocol` | 面向 VS Code 扩展等富客户端的 JSON-RPC API |
+| ---- | ----- | ---- |
+| **入口** | [`codex-cli`](https://github.com/openai/codex/tree/main/codex-rs/cli) | `codex` 二进制路由到 TUI、`app-server`、`exec`、MCP、插件等 |
+| **协议** | [`codex-protocol`](https://github.com/openai/codex/tree/main/codex-rs/protocol) | 共享的 op、event、配置、thread/turn item 类型 |
+| **核心** | [`codex-core`](https://github.com/openai/codex/tree/main/codex-rs/core) | 代理循环、会话管理、上下文构建、工具编排 |
+| **API 客户端** | [`codex-api`](https://github.com/openai/codex/tree/main/codex-rs/codex-api)、[`codex-client`](https://github.com/openai/codex/tree/main/codex-rs/codex-client) | 与 OpenAI Responses API 通信（SSE 流式） |
+| **执行** | [`exec-server`](https://github.com/openai/codex/tree/main/codex-rs/exec-server) | 拉起和控制子进程；可本地或远程 |
+| **沙箱** | [`sandboxing`](https://github.com/openai/codex/tree/main/codex-rs/sandboxing)、[`linux-sandbox`](https://github.com/openai/codex/tree/main/codex-rs/linux-sandbox)、[`windows-sandbox-rs`](https://github.com/openai/codex/tree/main/codex-rs/windows-sandbox-rs) | 平台相关的隔离机制 |
+| **扩展** | [`ext/*`](https://github.com/openai/codex/tree/main/codex-rs/ext) | Skills、MCP、connectors、memories、网页搜索、goal 等 |
+| **IDE 集成** | [`app-server`](https://github.com/openai/codex/tree/main/codex-rs/app-server)、[`app-server-protocol`](https://github.com/openai/codex/tree/main/codex-rs/app-server-protocol) | 面向 VS Code 扩展等富客户端的 JSON-RPC API |
 
-`codex-core` 是中心编排器，但仓库有意控制其体积；新功能倾向于落在独立 crate（`codex-tools`、`ext/*` 等）。
+[`codex-core`](https://github.com/openai/codex/tree/main/codex-rs/core) 是中心编排器，但仓库有意控制其体积；新功能倾向于落在独立 crate（[`codex-tools`](https://github.com/openai/codex/tree/main/codex-rs/tools)、[`ext/*`](https://github.com/openai/codex/tree/main/codex-rs/ext) 等）。
 
 ### 核心抽象：队列对
 
@@ -109,39 +110,39 @@ pub struct Codex {
 ## 重要目录
 
 | 路径 | 用途 |
-|------|------|
-| **`codex-rs/`** | 主 Rust workspace，几乎所有实现都在这里 |
-| **`codex-rs/core/`** | 代理业务逻辑：会话、turn、工具、上下文、审批 |
-| **`codex-rs/cli/`** | `codex` 二进制入口和子命令路由 |
-| **`codex-rs/tui/`** | 终端 UI（ratatui） |
-| **`codex-rs/app-server/`** | 面向 IDE/桌面的 JSON-RPC 服务 |
-| **`codex-rs/app-server-protocol/`** | v1/v2 API 类型（Rust + 生成的 TypeScript schema） |
-| **`codex-rs/protocol/`** | core、TUI、app-server 共享的内部协议类型 |
-| **`codex-rs/codex-api/`** | OpenAI Responses API 客户端和 SSE 解析 |
-| **`codex-rs/exec-server/`** | 本地/远程进程执行服务 |
-| **`codex-rs/sandboxing/`** | 跨平台沙箱策略与强制执行 |
-| **`codex-rs/tools/`** | 工具规格、适配器和共享执行契约 |
-| **`codex-rs/ext/`** | 可选扩展：skills、MCP、connectors、memories、web-search 等 |
-| **`codex-rs/config/`** | `config.toml` 加载和 schema |
-| **`codex-rs/thread-store/`** | thread/turn 持久化（SQLite） |
-| **`codex-rs/rollout/`** | 会话 rollout 追踪，用于调试/回放 |
-| **`codex-cli/`** | npm 包（`@openai/codex`）—— 分发包装 |
-| **`sdk/`** | 嵌入 Codex 用的 TypeScript 和 Python SDK |
-| **`docs/`** | 贡献者文档（安装、配置、沙箱、贡献指南） |
-| **`scripts/`、`bazel/`、`justfile`** | 构建、测试和开发自动化 |
-| **`third_party/`** | vendored 依赖（如 V8） |
+| ---- | ---- |
+| [`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs) | 主 Rust workspace，几乎所有实现都在这里 |
+| [`codex-rs/core/`](https://github.com/openai/codex/tree/main/codex-rs/core) | 代理业务逻辑：会话、turn、工具、上下文、审批 |
+| [`codex-rs/cli/`](https://github.com/openai/codex/tree/main/codex-rs/cli) | `codex` 二进制入口和子命令路由 |
+| [`codex-rs/tui/`](https://github.com/openai/codex/tree/main/codex-rs/tui) | 终端 UI（ratatui） |
+| [`codex-rs/app-server/`](https://github.com/openai/codex/tree/main/codex-rs/app-server) | 面向 IDE/桌面的 JSON-RPC 服务 |
+| [`codex-rs/app-server-protocol/`](https://github.com/openai/codex/tree/main/codex-rs/app-server-protocol) | v1/v2 API 类型（Rust + 生成的 TypeScript schema） |
+| [`codex-rs/protocol/`](https://github.com/openai/codex/tree/main/codex-rs/protocol) | core、TUI、app-server 共享的内部协议类型 |
+| [`codex-rs/codex-api/`](https://github.com/openai/codex/tree/main/codex-rs/codex-api) | OpenAI Responses API 客户端和 SSE 解析 |
+| [`codex-rs/exec-server/`](https://github.com/openai/codex/tree/main/codex-rs/exec-server) | 本地/远程进程执行服务 |
+| [`codex-rs/sandboxing/`](https://github.com/openai/codex/tree/main/codex-rs/sandboxing) | 跨平台沙箱策略与强制执行 |
+| [`codex-rs/tools/`](https://github.com/openai/codex/tree/main/codex-rs/tools) | 工具规格、适配器和共享执行契约 |
+| [`codex-rs/ext/`](https://github.com/openai/codex/tree/main/codex-rs/ext) | 可选扩展：skills、MCP、connectors、memories、web-search 等 |
+| [`codex-rs/config/`](https://github.com/openai/codex/tree/main/codex-rs/config) | `config.toml` 加载和 schema |
+| [`codex-rs/thread-store/`](https://github.com/openai/codex/tree/main/codex-rs/thread-store) | thread/turn 持久化（SQLite） |
+| [`codex-rs/rollout/`](https://github.com/openai/codex/tree/main/codex-rs/rollout) | 会话 rollout 追踪，用于调试/回放 |
+| [`codex-cli/`](https://github.com/openai/codex/tree/main/codex-cli) | npm 包（`@openai/codex`）—— 分发包装 |
+| [`sdk/`](https://github.com/openai/codex/tree/main/sdk) | 嵌入 Codex 用的 TypeScript 和 Python SDK |
+| [`docs/`](https://github.com/openai/codex/tree/main/docs) | 贡献者文档（安装、配置、沙箱、贡献指南） |
+| [`scripts/`](https://github.com/openai/codex/tree/main/scripts)、[`bazel/`](https://github.com/openai/codex/tree/main/bazel)、[`justfile`](https://github.com/openai/codex/blob/main/justfile) | 构建、测试和开发自动化 |
+| [`third_party/`](https://github.com/openai/codex/tree/main/third_party) | vendored 依赖（如 V8） |
 
-### 扩展 crate（`codex-rs/ext/`）
+### 扩展 crate（[`codex-rs/ext/`](https://github.com/openai/codex/tree/main/codex-rs/ext)）
 
-- `connectors` — 第三方服务集成
-- `extension-api` — 扩展注册和 hooks
-- `goal` — 目标跟踪扩展
-- `guardian` — 审查/安全扩展
-- `image-generation` — 图像生成工具
-- `mcp` — MCP 服务集成
-- `memories` — 长期记忆
-- `skills` — Agent skills
-- `web-search` — 网页搜索工具
+- [`connectors`](https://github.com/openai/codex/tree/main/codex-rs/ext/connectors) — 第三方服务集成
+- [`extension-api`](https://github.com/openai/codex/tree/main/codex-rs/ext/extension-api) — 扩展注册和 hooks
+- [`goal`](https://github.com/openai/codex/tree/main/codex-rs/ext/goal) — 目标跟踪扩展
+- [`guardian`](https://github.com/openai/codex/tree/main/codex-rs/ext/guardian) — 审查/安全扩展
+- [`image-generation`](https://github.com/openai/codex/tree/main/codex-rs/ext/image-generation) — 图像生成工具
+- [`mcp`](https://github.com/openai/codex/tree/main/codex-rs/ext/mcp) — MCP 服务集成
+- [`memories`](https://github.com/openai/codex/tree/main/codex-rs/ext/memories) — 长期记忆
+- [`skills`](https://github.com/openai/codex/tree/main/codex-rs/ext/skills) — Agent skills
+- [`web-search`](https://github.com/openai/codex/tree/main/codex-rs/ext/web-search) — 网页搜索工具
 
 ---
 
@@ -250,12 +251,28 @@ Client                    app-server                  codex-core
 
 ## 延伸阅读
 
+### 本仓库（codex-labs）
+
+- [layeredDesign_cn.md](layeredDesign_cn.md) / [layeredDesign.md](layeredDesign.md) — 分层架构详解
+- [resources/links_zh.md](../resources/links_zh.md) / [links.md](../resources/links.md) — 精选外部链接
+
+### GitHub 上的 [openai/codex](https://github.com/openai/codex)
+
+- [README.md](https://github.com/openai/codex/blob/main/README.md) — 项目概览与快速开始
+- [AGENTS.md](https://github.com/openai/codex/blob/main/AGENTS.md) — 贡献者约定和 crate 指引
+- [docs/contributing.md](https://github.com/openai/codex/blob/main/docs/contributing.md) — 贡献指南
+- [docs/install.md](https://github.com/openai/codex/blob/main/docs/install.md) — 安装与构建
+- [codex-rs/app-server/README.md](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md) — app-server 协议和 API 参考
+- [codex-rs/core/README.md](https://github.com/openai/codex/blob/main/codex-rs/core/README.md) — 各平台沙箱要求
+- [codex-rs/codex-api/README.md](https://github.com/openai/codex/blob/main/codex-rs/codex-api/README.md) — Responses API 客户端接口
+- [codex-rs/exec-server/README.md](https://github.com/openai/codex/blob/main/codex-rs/exec-server/README.md) — 进程执行服务
+- [codex-rs/protocol/README.md](https://github.com/openai/codex/blob/main/codex-rs/protocol/README.md) — 共享协议类型
+- [codex-rs/tools/README.md](https://github.com/openai/codex/blob/main/codex-rs/tools/README.md) — 工具规格与契约
+
+### 官方文档
+
 - [Codex 官方文档](https://developers.openai.com/codex)
-- `codex-rs/app-server/README.md` — app-server 协议和 API 参考
-- `codex-rs/core/README.md` — 各平台沙箱要求
-- `codex-rs/codex-api/README.md` — Responses API 客户端接口
-- codex 仓库中的 `AGENTS.md` — 贡献者约定和 crate 指引
 
 ---
 
-_基于对 openai/codex 仓库的探索整理。_
+_基于对 [openai/codex](https://github.com/openai/codex) 仓库的探索整理。_

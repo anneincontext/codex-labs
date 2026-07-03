@@ -33,7 +33,7 @@
 
 **角色：** 整个系统的**唯一可执行入口**（`codex` 命令）。
 
-你在终端敲 `codex`，实际跑的是 `codex-rs/cli` 编译出来的二进制。它**不做**代理推理本身，只做**路由**：
+你在终端敲 `codex`，实际跑的是 [`codex-rs/cli`](https://github.com/openai/codex/tree/main/codex-rs/cli) 编译出来的二进制。它**不做**代理推理本身，只做**路由**：
 
 | 子命令 / 模式 | 干什么 |
 |---------------|--------|
@@ -236,6 +236,22 @@ initialize → thread/start → turn/start → 收 item/* 通知 → turn/comple
 
 ## 延伸阅读
 
-- [architecture_cn.md](architecture_cn.md) — 仓库架构总览
-- [openai/codex](https://github.com/openai/codex) — 源码仓库
+### 本仓库（codex-labs）
+
+- [architecture_cn.md](architecture_cn.md) / [architecture.md](architecture.md) — 仓库架构总览
+- [resources/links_zh.md](../resources/links_zh.md) / [links.md](../resources/links.md) — 精选外部链接
+
+### GitHub 上的 [openai/codex](https://github.com/openai/codex)
+
+- [README.md](https://github.com/openai/codex/blob/main/README.md) — 项目概览与快速开始
+- [AGENTS.md](https://github.com/openai/codex/blob/main/AGENTS.md) — 贡献者约定和 crate 指引
+- [codex-rs/app-server/README.md](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md) — app-server 协议和 API 参考
+- [codex-rs/core/README.md](https://github.com/openai/codex/blob/main/codex-rs/core/README.md) — 各平台沙箱要求
+- [codex-rs/codex-api/README.md](https://github.com/openai/codex/blob/main/codex-rs/codex-api/README.md) — Responses API 客户端接口
+- [codex-rs/exec-server/README.md](https://github.com/openai/codex/blob/main/codex-rs/exec-server/README.md) — 进程执行服务
+- [codex-rs/protocol/README.md](https://github.com/openai/codex/blob/main/codex-rs/protocol/README.md) — 共享协议类型
+- [codex-rs/tools/README.md](https://github.com/openai/codex/blob/main/codex-rs/tools/README.md) — 工具规格与契约
+
+### 官方文档
+
 - [Codex 官方文档](https://developers.openai.com/codex)

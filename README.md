@@ -2,99 +2,71 @@
 
 **English** | [中文](README_zh.md)
 
-This repository is a shared canvas for me and Codex.
+A shared canvas for me and Codex — skills, workflows, cases, and notes from real use.
 
-It is a place to understand how Codex works, document practical workflows, and collect real examples of using Codex on software projects, writing tasks, research, automation, and day-to-day problem solving.
-
-## Purpose
-
-This repo is meant to help me:
-
-- Learn Codex by using it in real projects.
-- Record useful Codex workflows and patterns.
-- Keep examples of prompts, tasks, outcomes, and lessons learned.
-- Build a personal reference for what works well with Codex.
-- Explore how human judgment and agentic coding can work together.
-
-## What Goes Here
-
-The repo can grow organically. Useful content may include:
-
-- Notes about Codex concepts, features, and mental models.
-- Case studies from actual Codex sessions.
-- Prompt examples and reusable task descriptions.
-- Small experiments, prototypes, and demos.
-- Reflections on what Codex handled well and where human guidance mattered.
-- Checklists for common workflows like debugging, reviewing, writing docs, or shipping a change.
-
-## Suggested Structure
+## Structure
 
 ```text
 codex-labs/
-  README.md
-  README_zh.md
-  notes/
-    architecture.md
-    architecture_cn.md
-    layeredDesign.md
-    layeredDesign_cn.md
-  cases/
-    001-first-session.md
-  prompts/
-    review-prompts.md
-    debugging-prompts.md
-  experiments/
+├── skills/
+│   ├── debugging/
+│   ├── code-review/
+│   ├── repo-understanding/
+│   ├── documentation/
+│   ├── architecture/
+│   └── testing/
+├── workflows/
+│   ├── new-project/
+│   ├── fix-bug/
+│   ├── implement-feature/
+│   └── release/
+├── prompts/
+├── cases/
+├── experiments/
+├── notes/
+└── resources/
 ```
 
-The structure can change as the repo finds its shape. The important thing is that each document should make future Codex work easier to understand, repeat, or improve.
+## How it fits together
 
-## Documentation
+```text
+prompts  ──trigger──►  skills  ──combine──►  workflows
+cases / experiments ◄────────── record real runs
+notes / resources   ────────── theory & references
+```
+
+## Agent constraints
+
+| Doc | English | 中文 |
+| --- | ------- | ---- |
+| Lab working agreements | [AGENTS.md](AGENTS.md) | [AGENTS_zh.md](AGENTS_zh.md) |
+| What AGENTS.md constrains | [notes/agents-md.md](notes/agents-md.md) | [notes/agents-md_cn.md](notes/agents-md_cn.md) |
+
+## Start here
 
 | Topic | English | 中文 |
-|-------|---------|------|
-| Architecture overview | [architecture.md](notes/architecture.md) | [architecture_cn.md](notes/architecture_cn.md) |
-| Layered design (deep dive) | [layeredDesign.md](notes/layeredDesign.md) | [layeredDesign_cn.md](notes/layeredDesign_cn.md) |
+| ----- | ------- | ---- |
+| Skills index | [skills/README.md](skills/README.md) | [skills/README_zh.md](skills/README_zh.md) |
+| Workflows index | [workflows/README.md](workflows/README.md) | [workflows/README_zh.md](workflows/README_zh.md) |
+| Codex architecture | [notes/architecture.md](notes/architecture.md) | [notes/architecture_cn.md](notes/architecture_cn.md) |
+| Curated links | [resources/links.md](resources/links.md) | [resources/links_zh.md](resources/links_zh.md) |
+| Case template | [cases/TEMPLATE.md](cases/TEMPLATE.md) | [cases/TEMPLATE_zh.md](cases/TEMPLATE_zh.md) |
 
-## Case Study Template
+## Workflows at a glance
 
-Use this lightweight format when recording a Codex session:
+| Workflow | Skills chain |
+| -------- | ------------ |
+| [new-project](workflows/new-project/) | repo-understanding → architecture → documentation → testing |
+| [fix-bug](workflows/fix-bug/) | debugging → testing → code-review |
+| [implement-feature](workflows/implement-feature/) | repo-understanding → architecture → implement → testing → code-review |
+| [release](workflows/release/) | testing → documentation → code-review |
 
-```markdown
-# Case: <short title>
+## Working principles
 
-## Context
-
-What was the project, problem, or goal?
-
-## What I Asked Codex
-
-What prompt or instruction did I give?
-
-## What Codex Did
-
-What files, commands, reasoning, or outputs were involved?
-
-## What Worked
-
-What was useful, accurate, or surprisingly effective?
-
-## What Needed Guidance
-
-Where did I need to clarify, redirect, review, or make the final call?
-
-## Takeaways
-
-What should I remember for next time?
-```
-
-## Working Principles
-
-- Treat Codex as a collaborator, not an autopilot.
-- Write down the context that made a session successful.
-- Prefer concrete examples over abstract advice.
-- Keep notes small enough to reuse.
-- Capture failures too; they often teach the best workflows.
+- Skills are atomic; workflows compose them; cases prove they work
+- Treat Codex as a collaborator — human gates stay in skill/workflow docs
+- Capture failures; they teach the best workflows
 
 ## Status
 
-This repo is just getting started. It will become more useful as it collects real sessions, examples, and reflections.
+Just getting started. Add `SKILL.md` / prompt files as you use each path in anger.

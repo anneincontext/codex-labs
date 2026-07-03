@@ -1,0 +1,6 @@
+# Checklist: <name>
+
+Human gates before trusting agent output.
+
+- [ ] …
+- [ ] …

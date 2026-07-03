@@ -30,61 +30,62 @@ Related products (not all in this repo):
 
 ## Main Architecture
 
-The repo is a **Rust-first monorepo** (`codex-rs/`) with ~100 crates, plus Node/TypeScript packaging and SDKs.
+The repo is a **Rust-first monorepo** ([`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs)) with ~100 crates, plus Node/TypeScript packaging and SDKs.
 
 ```text
-┌─────────────────────────── Clients / Entry Points ───────────────────────────┐
-│                                                                              │
-│   codex-cli (binary)                                                         │
-│        │                                                                     │
-│        ├──► codex-tui          interactive terminal UI                       │
-│        ├──► codex app-server   JSON-RPC (IDE, desktop, SDKs)                 │
-│        └──► codex exec         headless / CI mode                              │
-│                                                                              │
-│   SDKs (TypeScript, Python) ──► app-server                                   │
-│                                                                              │
-└──────────────────────────────────────┬───────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Clients / Entry Points                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ codex-cli (binary)                                                          │
+│      │                                                                      │
+│      ├─► codex-tui           interactive terminal UI                        │
+│      ├─► codex app-server    JSON-RPC (IDE, desktop, SDKs)                  │
+│      └─► codex exec          headless / CI mode                             │
+│                                                                             │
+│ SDKs (TypeScript, Python) ─────────────────────────────► app-server         │
+└──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
                                        ▼
-┌────────────────────────────── Agent Core ────────────────────────────────────┐
-│                                                                              │
-│   codex-core                                                                 │
-│        │                                                                     │
-│        ├── codex-protocol      shared Op / Event / config types              │
-│        ├── codex-tools         tool specs, routing, execution contracts      │
-│        └── thread-store        SQLite persistence + rollout traces           │
-│                                                                              │
-│   Codex = queue pair:  submit(Op) ──► session loop ──► receive(Event)        │
-│                                                                              │
-└───────┬──────────────┬──────────────┬──────────────┬───────────────────────┘
-        │              │              │              │
-        ▼              ▼              ▼              ▼
-┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────────┐
-│  codex-api  │ │ exec-server │ │  codex-mcp  │ │  sandboxing                 │
-│             │ │             │ │             │ │                             │
-│  OpenAI     │ │  subprocess │ │  MCP tool   │ │  macOS: Seatbelt            │
-│  Responses  │ │  / PTY      │ │  servers    │ │  Linux: bubblewrap          │
-│  API (SSE)  │ │  local or   │ │             │ │  Windows: restricted token  │
-│             │ │  remote     │ │             │ │                             │
-└─────────────┘ └─────────────┘ └─────────────┘ └─────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                 Agent Core                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ codex-core                                                                  │
+│      │                                                                      │
+│      ├─ codex-protocol       shared Op / Event / config types               │
+│      ├─ codex-tools          tool specs, routing, execution                 │
+│      └─ thread-store         SQLite persistence + rollout traces            │
+│                                                                             │
+│ Codex = queue pair:  submit(Op) ──► session loop ──► receive(Event)         │
+└───────────┬─────────────────┬─────────────────┬─────────────────┬───────────┘
+            │                 │                 │                 │
+            ▼                 ▼                 ▼                 ▼
+    ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐
+    │   codex-api   │ │  exec-server  │ │   codex-mcp   │ │  sandboxing   │
+    │    OpenAI     │ │  subprocess   │ │   MCP tool    │ │macOS Seatbelt │
+    │   Responses   │ │     / PTY     │ │    servers    │ │  Linux bwrap  │
+    │   API (SSE)   │ │ local/remote  │ │               │ │  Win restr.   │
+    │               │ │               │ │               │ │               │
+    │               │ │               │ │               │ │               │
+    │               │ │               │ │               │ │               │
+    └───────────────┘ └───────────────┘ └───────────────┘ └───────────────┘
 ```
 
-> **Note:** Mermaid diagrams render in GitHub and some editors, but not in plain markdown viewers. This ASCII version is the canonical diagram for local reading.
+> **Note:** This ASCII diagram uses a fixed 79-column layout so boxes, connectors, and bottom modules align in monospace viewers.
 
 ### Layered design
 
-| Layer               | Crate(s)                                            | Role                                                                       |
-| ------------------- | --------------------------------------------------- | -------------------------------------------------------------------------- |
-| **Entry points**    | `codex-cli`                                         | `codex` binary dispatches to TUI, `app-server`, `exec`, MCP, plugins, etc. |
-| **Protocol**        | `codex-protocol`                                    | Shared types for ops, events, config, thread/turn items                    |
-| **Core**            | `codex-core`                                        | Agent loop, session management, context building, tool orchestration       |
-| **API client**      | `codex-api`, `codex-client`                         | Wire protocol to OpenAI Responses API (SSE streaming)                      |
-| **Execution**       | `exec-server`                                       | Spawns and controls subprocesses; can run locally or remotely              |
-| **Sandboxing**      | `sandboxing`, `linux-sandbox`, `windows-sandbox-rs` | Platform-specific isolation                                                |
-| **Extensions**      | `ext/*`                                             | Skills, MCP, connectors, memories, web search, goals, etc.                 |
-| **IDE integration** | `app-server`, `app-server-protocol`                 | JSON-RPC API for VS Code extension and other rich UIs                      |
+| Layer | Crate(s) | Role |
+| ----- | -------- | ---- |
+| **Entry points** | [`codex-cli`](https://github.com/openai/codex/tree/main/codex-rs/cli) | `codex` binary dispatches to TUI, `app-server`, `exec`, MCP, plugins, etc. |
+| **Protocol** | [`codex-protocol`](https://github.com/openai/codex/tree/main/codex-rs/protocol) | Shared types for ops, events, config, thread/turn items |
+| **Core** | [`codex-core`](https://github.com/openai/codex/tree/main/codex-rs/core) | Agent loop, session management, context building, tool orchestration |
+| **API client** | [`codex-api`](https://github.com/openai/codex/tree/main/codex-rs/codex-api), [`codex-client`](https://github.com/openai/codex/tree/main/codex-rs/codex-client) | Wire protocol to OpenAI Responses API (SSE streaming) |
+| **Execution** | [`exec-server`](https://github.com/openai/codex/tree/main/codex-rs/exec-server) | Spawns and controls subprocesses; can run locally or remotely |
+| **Sandboxing** | [`sandboxing`](https://github.com/openai/codex/tree/main/codex-rs/sandboxing), [`linux-sandbox`](https://github.com/openai/codex/tree/main/codex-rs/linux-sandbox), [`windows-sandbox-rs`](https://github.com/openai/codex/tree/main/codex-rs/windows-sandbox-rs) | Platform-specific isolation |
+| **Extensions** | [`ext/*`](https://github.com/openai/codex/tree/main/codex-rs/ext) | Skills, MCP, connectors, memories, web search, goals, etc. |
+| **IDE integration** | [`app-server`](https://github.com/openai/codex/tree/main/codex-rs/app-server), [`app-server-protocol`](https://github.com/openai/codex/tree/main/codex-rs/app-server-protocol) | JSON-RPC API for VS Code extension and other rich UIs |
 
-`codex-core` is the central orchestrator, but the repo actively resists growing it further. New features tend to land in dedicated crates (`codex-tools`, `ext/*`, etc.).
+[`codex-core`](https://github.com/openai/codex/tree/main/codex-rs/core) is the central orchestrator, but the repo actively resists growing it further. New features tend to land in dedicated crates ([`codex-tools`](https://github.com/openai/codex/tree/main/codex-rs/tools), [`ext/*`](https://github.com/openai/codex/tree/main/codex-rs/ext), etc.).
 
 ### Core abstraction: queue pair
 
@@ -108,40 +109,40 @@ Key outbound messages (`Event` / `EventMsg`): agent message deltas, tool progres
 
 ## Important Folders
 
-| Path                                 | Purpose                                                                  |
-| ------------------------------------ | ------------------------------------------------------------------------ |
-| **`codex-rs/`**                      | Main Rust workspace — almost all implementation                          |
-| **`codex-rs/core/`**                 | Agent business logic: sessions, turns, tools, context, approvals         |
-| **`codex-rs/cli/`**                  | `codex` binary entry point and subcommand routing                        |
-| **`codex-rs/tui/`**                  | Terminal UI (ratatui)                                                    |
-| **`codex-rs/app-server/`**           | JSON-RPC server for IDE/desktop integrations                             |
-| **`codex-rs/app-server-protocol/`**  | v1/v2 API types (Rust + generated TypeScript schemas)                    |
-| **`codex-rs/protocol/`**             | Internal protocol types shared across core, TUI, app-server              |
-| **`codex-rs/codex-api/`**            | OpenAI Responses API client and SSE parsing                              |
-| **`codex-rs/exec-server/`**          | Remote/local process execution server                                    |
-| **`codex-rs/sandboxing/`**           | Cross-platform sandbox policies and enforcement                          |
-| **`codex-rs/tools/`**                | Tool specs, adapters, and shared tool contracts                          |
-| **`codex-rs/ext/`**                  | Optional extensions: skills, MCP, connectors, memories, web-search, etc. |
-| **`codex-rs/config/`**               | `config.toml` loading and schema                                         |
-| **`codex-rs/thread-store/`**         | Persistent thread/turn storage (SQLite)                                  |
-| **`codex-rs/rollout/`**              | Session rollout traces for debugging/replay                              |
-| **`codex-cli/`**                     | npm package (`@openai/codex`) — distribution wrapper                     |
-| **`sdk/`**                           | TypeScript and Python SDKs for embedding Codex                           |
-| **`docs/`**                          | Contributor docs (install, config, sandbox, contributing)                |
-| **`scripts/`, `bazel/`, `justfile`** | Build, test, and dev automation                                          |
-| **`third_party/`**                   | Vendored dependencies (e.g. V8)                                          |
+| Path | Purpose |
+| ---- | ------- |
+| [`codex-rs/`](https://github.com/openai/codex/tree/main/codex-rs) | Main Rust workspace — almost all implementation |
+| [`codex-rs/core/`](https://github.com/openai/codex/tree/main/codex-rs/core) | Agent business logic: sessions, turns, tools, context, approvals |
+| [`codex-rs/cli/`](https://github.com/openai/codex/tree/main/codex-rs/cli) | `codex` binary entry point and subcommand routing |
+| [`codex-rs/tui/`](https://github.com/openai/codex/tree/main/codex-rs/tui) | Terminal UI (ratatui) |
+| [`codex-rs/app-server/`](https://github.com/openai/codex/tree/main/codex-rs/app-server) | JSON-RPC server for IDE/desktop integrations |
+| [`codex-rs/app-server-protocol/`](https://github.com/openai/codex/tree/main/codex-rs/app-server-protocol) | v1/v2 API types (Rust + generated TypeScript schemas) |
+| [`codex-rs/protocol/`](https://github.com/openai/codex/tree/main/codex-rs/protocol) | Internal protocol types shared across core, TUI, app-server |
+| [`codex-rs/codex-api/`](https://github.com/openai/codex/tree/main/codex-rs/codex-api) | OpenAI Responses API client and SSE parsing |
+| [`codex-rs/exec-server/`](https://github.com/openai/codex/tree/main/codex-rs/exec-server) | Remote/local process execution server |
+| [`codex-rs/sandboxing/`](https://github.com/openai/codex/tree/main/codex-rs/sandboxing) | Cross-platform sandbox policies and enforcement |
+| [`codex-rs/tools/`](https://github.com/openai/codex/tree/main/codex-rs/tools) | Tool specs, adapters, and shared tool contracts |
+| [`codex-rs/ext/`](https://github.com/openai/codex/tree/main/codex-rs/ext) | Optional extensions: skills, MCP, connectors, memories, web-search, etc. |
+| [`codex-rs/config/`](https://github.com/openai/codex/tree/main/codex-rs/config) | `config.toml` loading and schema |
+| [`codex-rs/thread-store/`](https://github.com/openai/codex/tree/main/codex-rs/thread-store) | Persistent thread/turn storage (SQLite) |
+| [`codex-rs/rollout/`](https://github.com/openai/codex/tree/main/codex-rs/rollout) | Session rollout traces for debugging/replay |
+| [`codex-cli/`](https://github.com/openai/codex/tree/main/codex-cli) | npm package (`@openai/codex`) — distribution wrapper |
+| [`sdk/`](https://github.com/openai/codex/tree/main/sdk) | TypeScript and Python SDKs for embedding Codex |
+| [`docs/`](https://github.com/openai/codex/tree/main/docs) | Contributor docs (install, config, sandbox, contributing) |
+| [`scripts/`](https://github.com/openai/codex/tree/main/scripts), [`bazel/`](https://github.com/openai/codex/tree/main/bazel), [`justfile`](https://github.com/openai/codex/blob/main/justfile) | Build, test, and dev automation |
+| [`third_party/`](https://github.com/openai/codex/tree/main/third_party) | Vendored dependencies (e.g. V8) |
 
-### Extension crates (`codex-rs/ext/`)
+### Extension crates ([`codex-rs/ext/`](https://github.com/openai/codex/tree/main/codex-rs/ext))
 
-- `connectors` — third-party service integrations
-- `extension-api` — extension registration and hooks
-- `goal` — goal-tracking extension
-- `guardian` — review/safety extension
-- `image-generation` — image generation tools
-- `mcp` — MCP server integration
-- `memories` — long-term memory
-- `skills` — agent skills
-- `web-search` — web search tools
+- [`connectors`](https://github.com/openai/codex/tree/main/codex-rs/ext/connectors) — third-party service integrations
+- [`extension-api`](https://github.com/openai/codex/tree/main/codex-rs/ext/extension-api) — extension registration and hooks
+- [`goal`](https://github.com/openai/codex/tree/main/codex-rs/ext/goal) — goal-tracking extension
+- [`guardian`](https://github.com/openai/codex/tree/main/codex-rs/ext/guardian) — review/safety extension
+- [`image-generation`](https://github.com/openai/codex/tree/main/codex-rs/ext/image-generation) — image generation tools
+- [`mcp`](https://github.com/openai/codex/tree/main/codex-rs/ext/mcp) — MCP server integration
+- [`memories`](https://github.com/openai/codex/tree/main/codex-rs/ext/memories) — long-term memory
+- [`skills`](https://github.com/openai/codex/tree/main/codex-rs/ext/skills) — agent skills
+- [`web-search`](https://github.com/openai/codex/tree/main/codex-rs/ext/web-search) — web search tools
 
 ---
 
@@ -250,12 +251,28 @@ The `codex` binary is the single entry point. Everything else composes around th
 
 ## Further Reading
 
+### This repo (codex-labs)
+
+- [layeredDesign.md](layeredDesign.md) / [layeredDesign_cn.md](layeredDesign_cn.md) — layer-by-layer architecture walkthrough
+- [resources/links.md](../resources/links.md) / [links_zh.md](../resources/links_zh.md) — curated external links
+
+### [openai/codex](https://github.com/openai/codex) on GitHub
+
+- [README.md](https://github.com/openai/codex/blob/main/README.md) — project overview and quickstart
+- [AGENTS.md](https://github.com/openai/codex/blob/main/AGENTS.md) — contributor conventions and crate guidance
+- [docs/contributing.md](https://github.com/openai/codex/blob/main/docs/contributing.md) — how to contribute
+- [docs/install.md](https://github.com/openai/codex/blob/main/docs/install.md) — install and build
+- [codex-rs/app-server/README.md](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md) — app-server protocol and API reference
+- [codex-rs/core/README.md](https://github.com/openai/codex/blob/main/codex-rs/core/README.md) — sandbox platform requirements
+- [codex-rs/codex-api/README.md](https://github.com/openai/codex/blob/main/codex-rs/codex-api/README.md) — Responses API client interface
+- [codex-rs/exec-server/README.md](https://github.com/openai/codex/blob/main/codex-rs/exec-server/README.md) — process execution server
+- [codex-rs/protocol/README.md](https://github.com/openai/codex/blob/main/codex-rs/protocol/README.md) — shared protocol types
+- [codex-rs/tools/README.md](https://github.com/openai/codex/blob/main/codex-rs/tools/README.md) — tool specs and contracts
+
+### Official docs
+
 - [Codex documentation](https://developers.openai.com/codex)
-- `codex-rs/app-server/README.md` — app-server protocol and API reference
-- `codex-rs/core/README.md` — sandbox platform requirements
-- `codex-rs/codex-api/README.md` — Responses API client interface
-- `AGENTS.md` in the codex repo — contributor conventions and crate guidance
 
 ---
 
-_Generated from exploration of the openai/codex repository._
+_Generated from exploration of the [openai/codex](https://github.com/openai/codex) repository._
