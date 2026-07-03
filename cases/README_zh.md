@@ -8,6 +8,7 @@
 
 | 案例                         | 简介                                                                    |
 | ---------------------------- | ----------------------------------------------------------------------- |
+| [006-ai-native-knowledge-engineering](006-ai-native-knowledge-engineering/case_zh.md) | Knowledge Engineering 而非 Prompt Engineering——渐进式披露与 AI-first 仓库 · [English](006-ai-native-knowledge-engineering/case.md) |
 | [005-learn-codex-repo](005-learn-codex-repo/case_zh.md) | 当前这个 repo 能够存在的原因 · [English](005-learn-codex-repo/case.md) |
 | [001-realtime-ai-presenter](001-realtime-ai-presenter/case_zh.md) | 用 Codex 做 OpenAI Realtime API 的 demo · [English](001-realtime-ai-presenter/case.md) |
 | [002-biotech-swe](002-biotech-swe/case_zh.md) | 生物科技公司工程师的真实感受 · [English](002-biotech-swe/case.md) |

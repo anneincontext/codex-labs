@@ -57,6 +57,7 @@ Full index with reading order: [notes/README.md](notes/README.md)
 
 | Case                         | Summary                                                                 |
 | ---------------------------- | ----------------------------------------------------------------------- |
+| [006-ai-native-knowledge-engineering](cases/006-ai-native-knowledge-engineering/case.md) | Knowledge engineering over prompt engineering — progressive disclosure & the AI-first repo · [中文](cases/006-ai-native-knowledge-engineering/case_zh.md) |
 | [005-learn-codex-repo](cases/005-learn-codex-repo/case.md) | Why this repo exists — learning a codebase with Codex · [中文](cases/005-learn-codex-repo/case_zh.md) |
 | [001-realtime-ai-presenter](cases/001-realtime-ai-presenter/case.md) | Building an OpenAI Realtime API demo with Codex · [中文](cases/001-realtime-ai-presenter/case_zh.md) |
 | [002-biotech-swe](cases/002-biotech-swe/case.md) | A biotech engineer's real experience · [中文](cases/002-biotech-swe/case_zh.md) |
