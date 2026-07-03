@@ -25,6 +25,7 @@ Every note opens with a header: **Answers** (what question it settles), **Read f
 | Understand the crate layering | [codex/layered-design.md](codex/layered-design.md) · [中文](codex/layered-design_zh.md) |
 | See how the terminal UI is designed | [codex/tui-interface-design.md](codex/tui-interface-design.md) · [中文](codex/tui-interface-design_zh.md) |
 | Look up TUI slash commands / shortcuts | [codex/tui-commands.md](codex/tui-commands.md) · [中文](codex/tui-commands_zh.md) |
+| Understand sandbox, approvals, and permissions | [codex/security-design.md](codex/security-design.md) · [中文](codex/security-design_zh.md) |
 | Learn a codebase with an agent (the flow this lab uses) | [method/learn-codebase-flow.md](method/learn-codebase-flow.md) · [中文](method/learn-codebase-flow_zh.md) |
 | Write a good AGENTS.md | [method/agents-md.md](method/agents-md.md) · [中文](method/agents-md_zh.md) |
 | Know how practitioners actually use AI tools | [research/real-workflows.md](research/real-workflows.md) · [中文](research/real-workflows_zh.md) |

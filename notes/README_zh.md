@@ -25,6 +25,7 @@ notes/
 | 理解 crate 分层 | [codex/layered-design_zh.md](codex/layered-design_zh.md) · [EN](codex/layered-design.md) |
 | 看终端 UI 怎么设计的 | [codex/tui-interface-design_zh.md](codex/tui-interface-design_zh.md) · [EN](codex/tui-interface-design.md) |
 | 查 TUI slash 命令 / 快捷键 | [codex/tui-commands_zh.md](codex/tui-commands_zh.md) · [EN](codex/tui-commands.md) |
+| 理解沙箱、审批与权限设计 | [codex/security-design_zh.md](codex/security-design_zh.md) · [EN](codex/security-design.md) |
 | 学「用 agent 读懂一个仓库」（本 lab 的工作流） | [method/learn-codebase-flow_zh.md](method/learn-codebase-flow_zh.md) · [EN](method/learn-codebase-flow.md) |
 | 写好一份 AGENTS.md | [method/agents-md_zh.md](method/agents-md_zh.md) · [EN](method/agents-md.md) |
 | 了解从业者实际怎么用 AI 工具 | [research/real-workflows_zh.md](research/real-workflows_zh.md) · [EN](research/real-workflows.md) |
