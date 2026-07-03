@@ -1,0 +1,29 @@
+# One learning turn inside Codex
+# Render: d2 --layout dagre codex-runtime.d2 codex-runtime.svg
+
+direction: down
+
+you: "You\n(prompt)" {
+  style.fill: "#E8F4FC"
+}
+
+cli: "CLI / TUI"
+core: "codex-core\nOp::UserInput"
+context: "Build context\n(AGENTS.md, cwd, thread, skills…)"
+api: "OpenAI Responses API\n(streaming)"
+
+tool_loop: "Tool loop" {
+  style.fill: "#FFF8E8"
+  tools: "Read / list / search repo"
+  back: "Tool results → model"
+  tools -> back
+}
+
+ui: "Stream events to UI"
+done: "Turn complete\nthread persisted" {
+  style.fill: "#E8FCE8"
+}
+
+you -> cli -> core -> context -> api
+api -> tool_loop -> api: "until done"
+api -> ui -> done

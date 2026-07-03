@@ -17,10 +17,10 @@
 
 ## Small company vs big company (their contrast)
 
-|                   | Small company                                                                    | Big company                                                                 |
-| ----------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| **Tech debt**     | Lighter; cheaper to change course                                                | **More** — architecture and business debt stacked together                  |
-| **Workflow & AI** | **More AI-embracing** — more willing to design software production as a pipeline | More organizational inertia; feature delivery often beats workflow redesign |
+| Dimension       | Small company                                              | Big company                                              |
+| --------------- | ---------------------------------------------------------- | -------------------------------------------------------- |
+| **Tech debt**   | Lighter; cheaper to change course                          | **More** — architecture and business debt stacked        |
+| **Workflow & AI** | **More AI-embracing** — designs production as a pipeline | More inertia; feature delivery beats workflow redesign   |
 
 One extra point (**not big-company-specific**): **harness gets built incrementally everywhere** — no team gets it in one shot.
 
@@ -57,7 +57,7 @@ That thread later became concrete: Anne used the same approach on [openai/codex]
 
 ## Takeaways for codex-labs
 
-| Observation             | Where it lives in the lab                                                            |
-| ----------------------- | ------------------------------------------------------------------------------------ |
-| Codebase interpretation | [005-learn-codex-repo](../005-learn-codex-repo/case.md) — one reason this lab exists |
-| Domain harness + evals  | `skills/` + `experiments/` per domain                                                |
+| Observation             | In the lab                                               |
+| ----------------------- | -------------------------------------------------------- |
+| Codebase interpretation | [005-learn-codex-repo](../005-learn-codex-repo/case.md) — why this lab exists |
+| Domain harness + evals  | `skills/` + `experiments/`                               |

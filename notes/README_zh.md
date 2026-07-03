@@ -6,9 +6,10 @@
 
 不是会话复盘（`cases/`），也不是可直接跑的模板（`prompts/`）。
 
-| 主题 | English | 中文 |
-| ---- | ------- | ---- |
-| 架构总览 | [architecture.md](architecture.md) | [architecture_cn.md](architecture_cn.md) |
-| 分层架构 | [layeredDesign.md](layeredDesign.md) | [layeredDesign_cn.md](layeredDesign_cn.md) |
-| AGENTS.md 约束什么 | [agents-md.md](agents-md.md) | [agents-md_cn.md](agents-md_cn.md) |
-| 真实世界工作流（三次语音访谈） | [real-workflows.md](real-workflows.md) | [real-workflows_cn.md](real-workflows_cn.md) |
+| 主题                               | English                              | 中文                                 |
+| ---------------------------------- | ------------------------------------ | ------------------------------------ |
+| 学习代码库（prompt → 结果）        | [learn-codebase-flow.md](learn-codebase-flow.md) | [learn-codebase-flow_cn.md](learn-codebase-flow_cn.md) |
+| 架构总览                           | [architecture.md](architecture.md)   | [architecture_cn.md](architecture_cn.md) |
+| 分层架构                           | [layeredDesign.md](layeredDesign.md) | [layeredDesign_cn.md](layeredDesign_cn.md) |
+| AGENTS.md 约束什么                 | [agents-md.md](agents-md.md)         | [agents-md_cn.md](agents-md_cn.md)   |
+| 真实世界工作流（三次语音访谈）     | [real-workflows.md](real-workflows.md) | [real-workflows_cn.md](real-workflows_cn.md) |

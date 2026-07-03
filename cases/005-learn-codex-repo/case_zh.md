@@ -8,6 +8,7 @@
 
 ## Prompt / 产出的 Notes
 
+- **链路（prompt → 结果）：** [notes/learn-codebase-flow_cn.md](../../notes/learn-codebase-flow_cn.md) / [English](../../notes/learn-codebase-flow.md)
 - **第一个 prompt：** [prompts/learn-repo-overview_zh.md](../../prompts/learn-repo-overview_zh.md)
 - **架构总览：** [notes/architecture_cn.md](../../notes/architecture_cn.md) / [English](../../notes/architecture.md)
 - **分层细读：** [notes/layeredDesign_cn.md](../../notes/layeredDesign_cn.md) / [English](../../notes/layeredDesign.md)

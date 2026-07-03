@@ -8,6 +8,7 @@
 
 ## Prompts / Notes produced
 
+- **Flow (prompt → result):** [notes/learn-codebase-flow.md](../../notes/learn-codebase-flow.md) / [中文](../../notes/learn-codebase-flow_cn.md)
 - **First prompt:** [prompts/learn-repo-overview.md](../../prompts/learn-repo-overview.md)
 - **Architecture overview:** [notes/architecture.md](../../notes/architecture.md) / [中文](../../notes/architecture_cn.md)
 - **Layer-by-layer walkthrough:** [notes/layeredDesign.md](../../notes/layeredDesign.md) / [中文](../../notes/layeredDesign_cn.md)

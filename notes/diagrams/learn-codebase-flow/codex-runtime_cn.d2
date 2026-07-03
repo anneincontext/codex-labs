@@ -1,0 +1,29 @@
+# 一轮学习请求在 Codex 内部
+# Render: d2 --layout dagre codex-runtime_cn.d2 codex-runtime_cn.svg
+
+direction: down
+
+you: "你\n（prompt）" {
+  style.fill: "#E8F4FC"
+}
+
+cli: "CLI / TUI"
+core: "codex-core\nOp::UserInput"
+context: "组装上下文\n（AGENTS.md、cwd、会话历史、skills…）"
+api: "OpenAI Responses API\n（流式）"
+
+tool_loop: "工具循环" {
+  style.fill: "#FFF8E8"
+  tools: "读 / 列目录 / 搜仓库"
+  back: "工具结果 → 模型"
+  tools -> back
+}
+
+ui: "事件流回 UI"
+done: "本轮结束\nthread 持久化" {
+  style.fill: "#E8FCE8"
+}
+
+you -> cli -> core -> context -> api
+api -> tool_loop -> api: "直到完成"
+api -> ui -> done

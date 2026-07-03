@@ -34,8 +34,8 @@
 
 ## 对 codex-labs 的映射
 
-| 观察 | 在 lab 里的位置 |
-| ---- | --------------- |
-| 每步 PM/开发掌舵 | `workflows/` 人工关卡 |
-| 文档 A vs B 对比 | 未来 `workflows/doc-driven-delivery/` |
-| 领域 harness + 评测 | `skills/` + `experiments/` |
+| 观察                | 在 lab 里的位置                           |
+| ------------------- | ----------------------------------------- |
+| 每步 PM/开发掌舵    | `workflows/` 人工关卡                     |
+| 文档 A vs B 对比    | 未来 `workflows/doc-driven-delivery/`     |
+| 领域 harness + 评测 | `skills/` + `experiments/`              |

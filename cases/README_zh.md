@@ -6,8 +6,8 @@
 
 每个案例一个文件夹：`001-short-title/case.md`（+ `case_zh.md`）。
 
-| 案例 | |
-| ---- | --- |
+| 案例                         | 简介                                                                    |
+| ---------------------------- | ----------------------------------------------------------------------- |
 | [005-learn-codex-repo](005-learn-codex-repo/case_zh.md) | 当前这个 repo 能够存在的原因 · [English](005-learn-codex-repo/case.md) |
 | [001-realtime-ai-presenter](001-realtime-ai-presenter/case_zh.md) | 用 Codex 做 OpenAI Realtime API 的 demo · [English](001-realtime-ai-presenter/case.md) |
 | [002-biotech-swe](002-biotech-swe/case_zh.md) | 生物科技公司工程师的真实感受 · [English](002-biotech-swe/case.md) |

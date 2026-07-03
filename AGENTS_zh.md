@@ -17,11 +17,37 @@
 
 ## 文件约定
 
-| 位置 | 必备文件 |
-| ---- | -------- |
-| `skills/<name>/` | `README.md`、`README_zh.md`、`SKILL.md`、`checklist.md` |
-| `workflows/<name>/` | `README.md`、`README_zh.md`、`WORKFLOW.md` |
-| `prompts/` | 触发该 skill 的 `<skill-name>.md` |
+| 位置                | 必备文件                                                    |
+| ------------------- | ----------------------------------------------------------- |
+| `skills/<name>/`    | `README.md`、`README_zh.md`、`SKILL.md`、`checklist.md`     |
+| `workflows/<name>/` | `README.md`、`README_zh.md`、`WORKFLOW.md`                  |
+| `prompts/`          | 触发该 skill 的 `<skill-name>.md`                           |
+
+## 表格与图示
+
+**写完先对齐再看一遍** — 表格不齐是本仓库常见的返工原因之一。
+
+### Markdown 表格
+
+- 每一列都要有**表头**（不要 `| 案例 | |` 这种空列名）。
+- 分隔行的 `-` **与表头列宽一致**。
+- 单元格 padding 让闭合的 `|` 在**等宽字体**里纵向对齐。
+- **中文 / 中英混排：** 按**显示宽度** padding（CJK 计 2 格，ASCII 计 1 格），不是按字符个数。
+- 简介放第二列；语言切换用行尾的 `· [中文]` / `· [English]`，省一列。
+
+### 流程图 — 用 [D2](https://d2lang.com/)
+
+- **不要**手写 ASCII 框图做多步流程 — 尤其中文很难对齐。
+- 源文件放 `notes/diagrams/<topic>/`，扩展名 `.d2`；同时提交 `.svg` 方便 GitHub 预览。
+- 渲染：`d2 --layout dagre file.d2 file.svg`（见 [diagrams/learn-codebase-flow/README.md](notes/diagrams/learn-codebase-flow/README.md)）。
+- 双语：英文 `foo.d2` + `foo.svg`，中文 `foo_cn.d2` + `foo_cn.svg`（标签不同时）。
+- Markdown 嵌入：`![说明](diagrams/.../foo.svg)`，并附 **图源：** 链到 `.d2`。
+- 示例：[notes/learn-codebase-flow_cn.md](notes/learn-codebase-flow_cn.md)。
+
+### 提交前
+
+- 在等宽编辑器里检查表格右边界。
+- 改过 `.d2` 后重新渲染，并把 `.svg` 一并提交。
 
 ## 原则
 

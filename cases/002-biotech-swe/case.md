@@ -37,8 +37,8 @@ Two colleagues resolve Git conflicts **manually** — they had not realized an a
 
 ## Takeaways for codex-labs
 
-| Observation | Where it lives in the lab |
-| ----------- | ------------------------ |
-| PM steer at each hop | `workflows/` human gates |
-| Global AGENTS.md | [AGENTS.md](../../AGENTS.md), [agents-md.md](../../notes/agents-md.md) |
-| Awareness gap | [notes/real-workflows.md](../../notes/real-workflows.md) |
+| Observation          | In the lab                                               |
+| -------------------- | -------------------------------------------------------- |
+| PM steer at each hop | `workflows/` human gates                                 |
+| Global AGENTS.md     | [AGENTS.md](../../AGENTS.md), [agents-md.md](../../notes/agents-md.md) |
+| Awareness gap        | [notes/real-workflows.md](../../notes/real-workflows.md) |

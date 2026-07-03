@@ -4,7 +4,7 @@
 
 High-level overview of the [openai/codex](https://github.com/openai/codex) repository — what it does, how it is structured, how requests flow, and what technologies it uses.
 
-> How this note was produced: [case 005 — Learn openai/codex](../cases/005-learn-codex-repo/case.md) · prompt: [learn-repo-overview.md](../prompts/learn-repo-overview.md)  
+> How this note was produced: [case 005](../cases/005-learn-codex-repo/case.md) · flow: [learn-codebase-flow.md](learn-codebase-flow.md) · prompt: [learn-repo-overview.md](../prompts/learn-repo-overview.md)  
 > For a layer-by-layer walkthrough, see [layeredDesign.md](layeredDesign.md) (English) or [layeredDesign_cn.md](layeredDesign_cn.md) (中文).
 
 ---

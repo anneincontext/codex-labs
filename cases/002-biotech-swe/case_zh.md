@@ -33,8 +33,8 @@ JIRA → Cursor 生成代码
 
 ## 对 codex-labs 的映射
 
-| 观察 | 在 lab 里的位置 |
-| ---- | --------------- |
-| 每步 PM/开发掌舵 | `workflows/` 人工关卡 |
-| 全局 AGENTS.md | [AGENTS_zh.md](../../AGENTS_zh.md) 模式 |
-| 认知缺口 | [notes/real-workflows_cn.md](../../notes/real-workflows_cn.md) |
+| 观察             | 在 lab 里的位置                                          |
+| ---------------- | -------------------------------------------------------- |
+| 每步 PM/开发掌舵 | `workflows/` 人工关卡                                    |
+| 全局 AGENTS.md   | [AGENTS_zh.md](../../AGENTS_zh.md) 模式                   |
+| 认知缺口         | [notes/real-workflows_cn.md](../../notes/real-workflows_cn.md) |

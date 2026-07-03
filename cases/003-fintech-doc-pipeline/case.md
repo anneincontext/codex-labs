@@ -36,8 +36,8 @@ Frontend (Android / iOS / Web) consumes **AI-generated interface docs** from bac
 
 ## Takeaways for codex-labs
 
-| Observation | Where it lives in the lab |
-| ----------- | ------------------------ |
-| PM/dev steer every hop | `workflows/` human gates |
+| Observation            | In the lab                              |
+| ---------------------- | --------------------------------------- |
+| PM/dev steer every hop | `workflows/` human gates                |
 | Doc A vs Doc B compare | Future `workflows/doc-driven-delivery/` |
-| Domain harness + evals | `skills/` + `experiments/` per domain |
+| Domain harness + evals | `skills/` + `experiments/`              |

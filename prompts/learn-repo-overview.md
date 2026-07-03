@@ -3,6 +3,7 @@
 **English** | [中文](learn-repo-overview_zh.md)
 
 **Case:** [cases/005-learn-codex-repo/case.md](../cases/005-learn-codex-repo/case.md)  
+**Flow (prompt → result):** [notes/learn-codebase-flow.md](../notes/learn-codebase-flow.md)  
 **Target repo (example):** [openai/codex](https://github.com/openai/codex)
 
 First prompt Anne used to learn a large unfamiliar repo with Codex. Works on any codebase you can open in the agent's workspace.
@@ -26,13 +27,13 @@ Please explain:
 
 ## Why these five bullets
 
-| Question | What you get |
-| -------- | ------------ |
-| What it does | Purpose and boundaries — what is in / out of scope |
-| Main architecture | Mental model before file-level reading |
-| Important folders | Where to look next; avoids random `grep` |
-| Request flow | How runtime behavior connects modules |
-| Technologies | Stack, build system, dependencies |
+| Question          | What you get                                       |
+| ----------------- | -------------------------------------------------- |
+| What it does      | Purpose and boundaries — in / out of scope         |
+| Main architecture | Mental model before file-level reading           |
+| Important folders | Where to look next; avoids random `grep`           |
+| Request flow      | How runtime behavior connects modules              |
+| Technologies      | Stack, build system, dependencies                  |
 
 You are asking for a **map**, not a line-by-line tour. Follow-up turns can zoom into one layer, one crate, or one path.
 
@@ -41,7 +42,7 @@ You are asking for a **map**, not a line-by-line tour. Follow-up turns can zoom 
 ## Suggested follow-ups (after the overview)
 
 ```text
-Draw an ASCII diagram of the request flow and align it with folder names.
+Draw a [D2](https://d2lang.com/) diagram of the request flow and align it with folder names.
 
 Walk through one user turn end-to-end — which crates and files are involved?
 

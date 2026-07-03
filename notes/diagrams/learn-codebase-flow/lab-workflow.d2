@@ -1,0 +1,32 @@
+# Lab workflow: prompt → durable result
+# Render: d2 --layout dagre lab-workflow.d2 lab-workflow.svg
+
+direction: down
+
+phase_a: "Phase A — Bootstrap" {
+  style.fill: "#E8F4FC"
+  open_repo: "Open target repo in Codex workspace"
+  prompt: "learn-repo-overview prompt\n(what / arch / folders / flow / stack)"
+  mental: "Mental model in chat"
+  open_repo -> prompt -> mental
+}
+
+phase_b: "Phase B — Zoom" {
+  style.fill: "#FFF8E8"
+  examples: "Short follow-ups" {
+    ex1: "Diagram aligned to folder names"
+    ex2: "One user turn end-to-end"
+    ex3: "If changing X — read what first?"
+  }
+  rule: "One layer or one path per turn"
+  examples -> rule
+}
+
+phase_c: "Phase C — Cache" {
+  style.fill: "#E8FCE8"
+  notes: "Write or refine notes/\n(e.g. architecture, layeredDesign)"
+  reuse: "Reuse next session — no re-exploration cost"
+  notes -> reuse
+}
+
+phase_a -> phase_b -> phase_c

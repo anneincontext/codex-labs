@@ -21,10 +21,10 @@ One structured prompt covering: objective, base repo, demo UX, stack prefs, succ
 
 ## Timeline
 
-| Phase | What happened | ~Time |
-| ----- | ------------- | ----- |
-| **Bootstrap** | One structured prompt ([implement-demo.md](../../prompts/implement-demo.md)) → working demo on top of realtime-console | **~20 min** |
-| **Polish** | Continued conversation — usability, edge cases, README shortcuts, presenter flow | Ongoing |
+| Phase         | What happened                                                                                    | ~Time       |
+| ------------- | ------------------------------------------------------------------------------------------------ | ----------- |
+| **Bootstrap** | One structured prompt ([implement-demo.md](../../prompts/implement-demo.md)) → working demo      | **~20 min** |
+| **Polish**    | Continued conversation — usability, edge cases, README shortcuts, presenter flow                 | Ongoing     |
 
 The first pass got something **demoable** quickly because the prompt already specified base repo, success criteria, and verification. Follow-up turns were smaller asks, not re-explaining the whole product.
 

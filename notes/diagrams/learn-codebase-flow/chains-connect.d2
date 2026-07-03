@@ -1,0 +1,24 @@
+# How lab workflow and runtime connect
+# Render: d2 --layout dagre chains-connect.d2 chains-connect.svg
+
+direction: down
+
+prompt: "Overview prompt\n(5 questions)" {
+  style.fill: "#E8F4FC"
+}
+
+turn: "Codex turn(s)\nUserInput → context → API ↔ tools(repo)" {
+  style.fill: "#FFF8E8"
+}
+
+chat: "Chat answer\n(immediate)" {
+  style.fill: "#E8FCE8"
+}
+
+notes: "notes/\n(durable)" {
+  style.fill: "#E8FCE8"
+}
+
+prompt -> turn
+turn -> chat: "immediate"
+turn -> notes: "your follow-ups"

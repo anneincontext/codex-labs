@@ -6,8 +6,8 @@ Real session retrospectives — what happened in the wild.
 
 Each case lives in its own folder: `001-short-title/case.md` (+ `case_zh.md`).
 
-| Case | |
-| ---- | --- |
+| Case                         | Summary                                                                 |
+| ---------------------------- | ----------------------------------------------------------------------- |
 | [005-learn-codex-repo](005-learn-codex-repo/case.md) | Why this repo exists — learning a codebase with Codex · [中文](005-learn-codex-repo/case_zh.md) |
 | [001-realtime-ai-presenter](001-realtime-ai-presenter/case.md) | Building an OpenAI Realtime API demo with Codex · [中文](001-realtime-ai-presenter/case_zh.md) |
 | [002-biotech-swe](002-biotech-swe/case.md) | A biotech engineer's real experience · [中文](002-biotech-swe/case_zh.md) |
