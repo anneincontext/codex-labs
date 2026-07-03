@@ -16,6 +16,8 @@
 
 Codex is a large, unfamiliar codebase. Reading source directly — jumping between crates, build files, and protocol types — used to feel too heavy to start.
 
+In [case 004](../004-bigtech-infra/case.md), the interviewee also said Codex works well for **large-repo / code interpretation**. Anne tried it and agreed — **AI is genuinely effective at helping people understand a codebase** — which is why **codex-labs exists**.
+
 Instead: open the repo in Codex and ask for a structured overview first. Turn the agent into a **guided tour** before deep reading.
 
 ## What I Asked Codex

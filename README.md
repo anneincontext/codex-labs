@@ -48,14 +48,14 @@ notes / resources   ────────── theory & references
 
 ### Cases
 
-| Case | English | 中文 |
-| ---- | ------- | ---- |
-| 005 — Learn openai/codex | [cases/005-learn-codex-repo/case.md](cases/005-learn-codex-repo/case.md) | [cases/005-learn-codex-repo/case_zh.md](cases/005-learn-codex-repo/case_zh.md) |
-| 001 — Realtime AI Presenter demo | [cases/001-realtime-ai-presenter/case.md](cases/001-realtime-ai-presenter/case.md) | [cases/001-realtime-ai-presenter/case_zh.md](cases/001-realtime-ai-presenter/case_zh.md) |
-| 002 — Biotech SWE | [cases/002-biotech-swe/case.md](cases/002-biotech-swe/case.md) | [cases/002-biotech-swe/case_zh.md](cases/002-biotech-swe/case_zh.md) |
-| 003 — Fintech doc pipeline | [cases/003-fintech-doc-pipeline/case.md](cases/003-fintech-doc-pipeline/case.md) | [cases/003-fintech-doc-pipeline/case_zh.md](cases/003-fintech-doc-pipeline/case_zh.md) |
-| 004 — Big Tech infra | [cases/004-bigtech-infra/case.md](cases/004-bigtech-infra/case.md) | [cases/004-bigtech-infra/case_zh.md](cases/004-bigtech-infra/case_zh.md) |
-| Template | [cases/_template/case.md](cases/_template/case.md) | [cases/_template/case_zh.md](cases/_template/case_zh.md) |
+| Case | |
+| ---- | --- |
+| [005-learn-codex-repo](cases/005-learn-codex-repo/case.md) | Why this repo exists — learning a codebase with Codex · [中文](cases/005-learn-codex-repo/case_zh.md) |
+| [001-realtime-ai-presenter](cases/001-realtime-ai-presenter/case.md) | Building an OpenAI Realtime API demo with Codex · [中文](cases/001-realtime-ai-presenter/case_zh.md) |
+| [002-biotech-swe](cases/002-biotech-swe/case.md) | A biotech engineer's real experience · [中文](cases/002-biotech-swe/case_zh.md) |
+| [003-fintech-doc-pipeline](cases/003-fintech-doc-pipeline/case.md) | A fintech engineer's real experience · [中文](cases/003-fintech-doc-pipeline/case_zh.md) |
+| [004-bigtech-infra](cases/004-bigtech-infra/case.md) | An engineer who just moved from a small company to a big one · [中文](cases/004-bigtech-infra/case_zh.md) |
+| [_template](cases/_template/case.md) | Copy to start a new case · [中文](cases/_template/case_zh.md) |
 
 ## Working principles
 

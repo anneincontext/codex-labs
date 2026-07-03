@@ -31,11 +31,15 @@
 
 **Lab 对应：** 未来可加 workflow `doc-driven-delivery/`；skill `documentation/`。
 
-### 4. Harness 强领域相关（大厂 infra）
+### 4. 小公司更拥抱 AI，大厂技术债更重（infra 工程师）
 
-不能脱离 **领域** 谈 harness / agent loop：测试平台、可观测性、中间件状态、运维手册。
+受访者从小公司进大厂，**刚入职、尚未上手业务代码**。公司 AI 额度不低（约 **$1000/月** 工具 + **Cursor Enterprise**）。他的对比：**大厂技术债更重**，在工作流上 **不如小公司那么拥抱 AI**；**harness 哪家公司都是一点点补**，不是大厂独有。
 
-**Lab 对应：** [agents-md_cn.md](agents-md_cn.md) 是项目级；组织级 harness = 分领域的 skills + 评测。
+Harness 看法主要来自小公司经验，不能脱离 **领域**（测试平台、可观测性、中间件状态等）。
+
+他还提到 Codex 适合 **代码仓库解读** — Anne 后来用同一方式读 openai/codex，[codex-labs](../cases/005-learn-codex-repo/case_zh.md) 由此诞生；AI 在帮人理解代码库上确实很有效。
+
+**Lab 对应：** [agents-md_cn.md](agents-md_cn.md) 是项目级；组织级 harness = 分领域的 skills + 评测。完整案例：[004-bigtech-infra](../cases/004-bigtech-infra/case_zh.md)。
 
 ### 5. 生产力 ↑ ≠ 工作量 ↓
 

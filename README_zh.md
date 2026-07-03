@@ -48,14 +48,14 @@ notes / resources   ─────────── 原理与参考资料
 
 ### 案例
 
-| 案例 | English | 中文 |
-| ---- | ------- | ---- |
-| 005 — 用 AI 学习 openai/codex | [cases/005-learn-codex-repo/case.md](cases/005-learn-codex-repo/case.md) | [cases/005-learn-codex-repo/case_zh.md](cases/005-learn-codex-repo/case_zh.md) |
-| 001 — Realtime AI Presenter demo | [cases/001-realtime-ai-presenter/case.md](cases/001-realtime-ai-presenter/case.md) | [cases/001-realtime-ai-presenter/case_zh.md](cases/001-realtime-ai-presenter/case_zh.md) |
-| 002 — 生物科技 SWE | [cases/002-biotech-swe/case.md](cases/002-biotech-swe/case.md) | [cases/002-biotech-swe/case_zh.md](cases/002-biotech-swe/case_zh.md) |
-| 003 — 金融科技文档流水线 | [cases/003-fintech-doc-pipeline/case.md](cases/003-fintech-doc-pipeline/case.md) | [cases/003-fintech-doc-pipeline/case_zh.md](cases/003-fintech-doc-pipeline/case_zh.md) |
-| 004 — 大厂 infra | [cases/004-bigtech-infra/case.md](cases/004-bigtech-infra/case.md) | [cases/004-bigtech-infra/case_zh.md](cases/004-bigtech-infra/case_zh.md) |
-| 模板 | [cases/_template/case.md](cases/_template/case.md) | [cases/_template/case_zh.md](cases/_template/case_zh.md) |
+| 案例 | |
+| ---- | --- |
+| [005-learn-codex-repo](cases/005-learn-codex-repo/case_zh.md) | 当前这个 repo 能够存在的原因 · [English](cases/005-learn-codex-repo/case.md) |
+| [001-realtime-ai-presenter](cases/001-realtime-ai-presenter/case_zh.md) | 用 Codex 做 OpenAI Realtime API 的 demo · [English](cases/001-realtime-ai-presenter/case.md) |
+| [002-biotech-swe](cases/002-biotech-swe/case_zh.md) | 生物科技公司工程师的真实感受 · [English](cases/002-biotech-swe/case.md) |
+| [003-fintech-doc-pipeline](cases/003-fintech-doc-pipeline/case_zh.md) | 金融科技公司工程师的真实感受 · [English](cases/003-fintech-doc-pipeline/case.md) |
+| [004-bigtech-infra](cases/004-bigtech-infra/case_zh.md) | 刚从小公司到大公司的工程师的感受 · [English](cases/004-bigtech-infra/case.md) |
+| [_template](cases/_template/case_zh.md) | 复制以新建案例 · [English](cases/_template/case.md) |
 
 ## 工作原则
 

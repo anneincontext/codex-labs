@@ -31,11 +31,15 @@ Req Doc A (pre-code) vs Req Doc B (derived from code) → **compare** under PM +
 
 **Lab mapping:** future workflow `doc-driven-delivery/`; skill `documentation/`.
 
-### 4. Harness is domain-specific (Big Tech infra)
+### 4. Small cos embrace AI workflows; big cos carry more debt (infra engineer)
 
-Cannot discuss harness / agent loop without the **domain**: test platform, observability, middleware state, ops playbooks.
+Interviewee moved from a **small company to a big one** — **just joined, not on production code yet**. Company AI allowance is real (~**$1k/mo** tooling + **Cursor Enterprise**). Contrast: **more tech debt** at big co., **less AI-embracing workflows** than his small-co. experience; **harness is built incrementally everywhere**, not a big-co.-only problem.
 
-**Lab mapping:** [agents-md.md](agents-md.md) is project-local; org harness = per-domain skills + evals.
+Harness views mostly come from small-company years; still domain-tied (test platform, observability, middleware state, etc.).
+
+He also said Codex works well for **codebase interpretation** — Anne later used the same approach on openai/codex, which is [why codex-labs exists](../cases/005-learn-codex-repo/case.md); AI is genuinely effective at helping people understand a repo.
+
+**Lab mapping:** [agents-md.md](agents-md.md) is project-local; org harness = per-domain skills + evals. Full case: [004-bigtech-infra](../cases/004-bigtech-infra/case.md).
 
 ### 5. Productivity ≠ less work
 
